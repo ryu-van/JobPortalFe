@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getUserFriendlyError } from "../utils/errorHandler";
 
 const axiosClient = axios.create({
   baseURL: "http://localhost:8080/api/v1",
@@ -10,10 +11,14 @@ const axiosClient = axios.create({
 axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
-      console.warn("Unauthorized - có thể hết hạn phiên đăng nhập");
-    }
-    return Promise.reject(error);
+    const apiMessage = error.response?.data?.message;
+    const friendly = getUserFriendlyError(apiMessage);
+    return Promise.reject(
+      {
+        ...error,
+        friendlyMessage: friendly
+      }
+    );
   }
 );
 

@@ -5,3 +5,10 @@
 * {
   font-family: 'Rubik', sans-serif;
 }
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+html, body {
+  overflow: hidden;
+}

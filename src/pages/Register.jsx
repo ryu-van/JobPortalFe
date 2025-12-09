@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Briefcase,
@@ -21,15 +23,46 @@ import {
 import InputField from "../components/common/InputField";
 import SelectField from "../components/common/SelectField";
 import BrandButton from "../components/common/BrandButton";
-
+import authService from "../services/authService";
 const Register = () => {
+  const navigate = useNavigate();
   const [role, setRole] = useState("user");
   const [formData, setFormData] = useState({
-    user: { name: "", email: "", gender: "", password: "", confirmPassword: "" },
-    hr: { name: "", email: "",  gender: "",password: "", confirmPassword: "", inviteCode: "" },
+    user: {
+      name: "",
+      email: "",
+      gender: "",
+      password: "",
+      confirmPassword: "",
+    },
+    hr: {
+      name: "",
+      email: "",
+      gender: "",
+      password: "",
+      confirmPassword: "",
+      inviteCode: "",
+    },
+  });
+  const [fieldErrors, setFieldErrors] = useState({
+    user: {
+      name: "",
+      email: "",
+      gender: "",
+      password: "",
+      confirmPassword: "",
+    },
+    hr: {
+      name: "",
+      email: "",
+      gender: "",
+      password: "",
+      confirmPassword: "",
+      inviteCode: "",
+    },
   });
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
+  const [error, setError] = useState("");
   const handleMouseMove = (e) => {
     const { innerWidth, innerHeight } = window;
     const x = (e.clientX / innerWidth - 0.5) * 2;
@@ -43,36 +76,101 @@ const Register = () => {
       ...prev,
       [type]: { ...prev[type], [name]: value },
     }));
+    setFieldErrors((prev) => ({
+      ...prev,
+      [type]: { ...prev[type], [name]: "" },
+    }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const data = role === "user" ? formData.user : formData.hr;
+    setError("");
+    const errors = {};
     if (role === "user") {
-      if (!data.gender) {
-        alert("Vui lòng chọn giới tính.");
-        return;
-      }
-      if (data.password !== data.confirmPassword) {
-        alert("Mật khẩu nhập lại không khớp.");
-        return;
+      if (!data.name) errors.name = "Vui lòng nhập họ và tên.";
+      if (!data.email) errors.email = "Vui lòng nhập email.";
+      if (!data.gender) errors.gender = "Vui lòng chọn giới tính.";
+      if (!data.password) errors.password = "Vui lòng nhập mật khẩu.";
+      if (!data.confirmPassword)
+        errors.confirmPassword = "Vui lòng nhập lại mật khẩu.";
+      if (
+        data.password &&
+        data.confirmPassword &&
+        data.password !== data.confirmPassword
+      ) {
+        errors.confirmPassword = "Mật khẩu nhập lại không khớp.";
       }
     }
     if (role === "hr") {
-      if (!data.inviteCode) {
-        alert("Vui lòng nhập mã mời.");
-        return;
+      if (!data.name) errors.name = "Vui lòng nhập họ và tên.";
+      if (!data.email) errors.email = "Vui lòng nhập email.";
+      if (!data.gender) errors.gender = "Vui lòng chọn giới tính.";
+      if (!data.password) errors.password = "Vui lòng nhập mật khẩu.";
+      if (!data.confirmPassword)
+        errors.confirmPassword = "Vui lòng nhập lại mật khẩu.";
+      if (
+        data.password &&
+        data.confirmPassword &&
+        data.password !== data.confirmPassword
+      ) {
+        errors.confirmPassword = "Mật khẩu nhập lại không khớp.";
       }
-      if (data.password !== data.confirmPassword) {
-        alert("Mật khẩu nhập lại không khớp.");
-        return;
-      }
+      if (!data.inviteCode) errors.inviteCode = "Vui lòng nhập mã mời.";
     }
-    console.log(`Đăng ký ${role}:`, data);
-    alert(
-      `Đăng ký thành công với vai trò: ${
-        role === "user" ? "ứng viên" : "nhà tuyển dụng"
-      }`
-    );
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [role]: { ...prev[role], ...errors },
+      }));
+      return;
+    }
+
+    const genderBool =
+      data.gender === "male" ? true : data.gender === "female" ? false : null;
+    const payload =
+      role === "user"
+        ? {
+            fullName: data.name,
+            email: data.email,
+            password: data.password,
+            gender: genderBool,
+            roleId: 1,
+            codeInvitation: "",
+          }
+        : {
+            fullName: data.name,
+            email: data.email,
+            password: data.password,
+            gender: genderBool,
+            roleId: 3,
+            codeInvitation: data.inviteCode,
+          };
+
+    try {
+      await authService.register(payload);
+      alert(
+        "Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản."
+      );
+      navigate("/login");
+    } catch (err) {
+      const friendly = err.friendlyMessage || "Đã có lỗi xảy ra.";
+      const raw = err.rawMessage?.toLowerCase() || "";
+
+      setError(friendly);
+
+      const update = {};
+
+      if (raw.includes("email")) update.email = friendly;
+      if (raw.includes("invite") || raw.includes("code"))
+        update.inviteCode = friendly;
+      if (raw.includes("password")) update.password = friendly;
+
+      setFieldErrors((prev) => ({
+        ...prev,
+        [role]: { ...prev[role], ...update },
+      }));
+    }
   };
 
   const formVariants = {
@@ -83,24 +181,59 @@ const Register = () => {
 
   // 🌟 Icon trang trí
   const floatingIcons = [
-    { icon: <Briefcase size={60} color="#27592D" />, x: -260, y: -140, delay: 0 },
+    {
+      icon: <Briefcase size={60} color="#27592D" />,
+      x: -260,
+      y: -140,
+      delay: 0,
+    },
     { icon: <FileText size={55} color="#AA423A" />, x: 240, y: 100, delay: 1 },
-    { icon: <Lightbulb size={65} color="#FFC801" />, x: -180, y: 180, delay: 2 },
+    {
+      icon: <Lightbulb size={65} color="#FFC801" />,
+      x: -180,
+      y: 180,
+      delay: 2,
+    },
     { icon: <Target size={58} color="#27592D" />, x: 180, y: -160, delay: 1.5 },
     { icon: <User size={60} color="#27592D" />, x: 0, y: -60, delay: 0.7 },
     { icon: <Send size={50} color="#AA423A" />, x: -220, y: 40, delay: 2.5 },
     { icon: <Star size={50} color="#FFC801" />, x: 280, y: -100, delay: 3 },
-    { icon: <HeartHandshake size={58} color="#27592D" />, x: 100, y: 200, delay: 3.5 },
-    { icon: <Building2 size={60} color="#27592D" />, x: -200, y: 140, delay: 4 },
+    {
+      icon: <HeartHandshake size={58} color="#27592D" />,
+      x: 100,
+      y: 200,
+      delay: 3.5,
+    },
+    {
+      icon: <Building2 size={60} color="#27592D" />,
+      x: -200,
+      y: 140,
+      delay: 4,
+    },
     { icon: <Laptop size={58} color="#AA423A" />, x: 200, y: 160, delay: 4.5 },
-    { icon: <Rocket size={62} color="#FFC801" />, x: -300, y: -100, delay: 2.8 },
+    {
+      icon: <Rocket size={62} color="#FFC801" />,
+      x: -300,
+      y: -100,
+      delay: 2.8,
+    },
     { icon: <Globe size={58} color="#27592D" />, x: 300, y: 60, delay: 1.2 },
-    { icon: <GraduationCap size={58} color="#AA423A" />, x: -280, y: 80, delay: 3.4 },
+    {
+      icon: <GraduationCap size={58} color="#AA423A" />,
+      x: -280,
+      y: 80,
+      delay: 3.4,
+    },
     { icon: <PenTool size={55} color="#27592D" />, x: 260, y: -40, delay: 2 },
     { icon: <Coffee size={50} color="#AA423A" />, x: -240, y: 200, delay: 1.7 },
     { icon: <Layers size={55} color="#27592D" />, x: 120, y: -200, delay: 4 },
     { icon: <Star size={58} color="#FFC801" />, x: -180, y: -220, delay: 1.3 },
-    { icon: <Lightbulb size={64} color="#FFC801" />, x: 150, y: 220, delay: 2.6 },
+    {
+      icon: <Lightbulb size={64} color="#FFC801" />,
+      x: 150,
+      y: 220,
+      delay: 2.6,
+    },
   ];
 
   return (
@@ -151,14 +284,15 @@ const Register = () => {
             </motion.div>
           ))}
 
-          {/* Logo text */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 2, ease: "easeOut" }}
             className="font-extrabold text-4xl md:text-6xl tracking-wide text-[#27592D] drop-shadow-md select-none"
             style={{
-              transform: `translate(${mousePosition.x * 10}px, ${mousePosition.y * 10}px)`,
+              transform: `translate(${mousePosition.x * 10}px, ${
+                mousePosition.y * 10
+              }px)`,
             }}
           >
             <span className="text-[#27592D]">Ryu</span>{" "}
@@ -169,12 +303,15 @@ const Register = () => {
         {/* Mobile brand header */}
         <div className="md:hidden w-full flex items-center justify-center mb-4">
           <div className="flex items-center gap-2">
-            <span className="font-extrabold text-2xl tracking-wide text-[#27592D]">Ryu</span>
-            <span className="font-extrabold text-3xl tracking-wide text-[#AA423A]">Career</span>
+            <span className="font-extrabold text-2xl tracking-wide text-[#27592D]">
+              Ryu
+            </span>
+            <span className="font-extrabold text-3xl tracking-wide text-[#AA423A]">
+              Career
+            </span>
           </div>
         </div>
 
-        {/* Right: Form */}
         <motion.div
           className="w-full max-w-md bg-white/70 backdrop-blur-lg shadow-2xl rounded-3xl p-6 sm:p-8 md:p-10 border border-white/30"
           whileHover={{ scale: 1.01 }}
@@ -189,7 +326,6 @@ const Register = () => {
               exit="exit"
               transition={{ duration: 0.35 }}
             >
-              {/* Tabs */}
               <div className="flex items-center justify-center gap-4 sm:gap-6 mb-6">
                 <button
                   type="button"
@@ -215,7 +351,6 @@ const Register = () => {
                 </button>
               </div>
 
-              {/* Form content */}
               <div className="mb-8 text-center">
                 <h2
                   className={`text-2xl sm:text-3xl md:text-4xl font-semibold mb-3 ${
@@ -243,6 +378,7 @@ const Register = () => {
                       onChange={(e) => handleInputChange(e, "user")}
                       placeholder="Họ và tên"
                       className="border-[#C7A59D]/40 rounded-xl px-5 py-3 bg-white/60 focus:ring-[#27592D]"
+                      error={fieldErrors.user.name}
                     />
                     <InputField
                       name="email"
@@ -251,9 +387,9 @@ const Register = () => {
                       onChange={(e) => handleInputChange(e, "user")}
                       placeholder="Email"
                       className="border-[#C7A59D]/40 rounded-xl px-5 py-3 bg-white/60 focus:ring-[#27592D]"
+                      error={fieldErrors.user.email}
                     />
 
-                    {/* ✅ SelectField thay cho <select> */}
                     <SelectField
                       name="gender"
                       value={formData.user.gender}
@@ -265,6 +401,7 @@ const Register = () => {
                         { value: "female", label: "Nữ ♀" },
                         { value: "other", label: "Khác ⚧" },
                       ]}
+                      error={fieldErrors.user.gender}
                     />
 
                     <InputField
@@ -274,6 +411,8 @@ const Register = () => {
                       onChange={(e) => handleInputChange(e, "user")}
                       placeholder="Mật khẩu"
                       className="border-[#C7A59D]/40 rounded-xl px-5 py-3 bg-white/60 focus:ring-[#27592D]"
+                      togglePassword
+                      error={fieldErrors.user.password}
                     />
                     <InputField
                       name="confirmPassword"
@@ -282,17 +421,20 @@ const Register = () => {
                       onChange={(e) => handleInputChange(e, "user")}
                       placeholder="Nhập lại mật khẩu"
                       className="border-[#C7A59D]/40 rounded-xl px-5 py-3 bg-white/60 focus:ring-[#27592D]"
+                      togglePassword
+                      error={fieldErrors.user.confirmPassword}
                     />
                   </>
                 ) : (
                   <>
                     <InputField
-                      name="company"
+                      name="name"
                       type="text"
                       value={formData.hr.name}
                       onChange={(e) => handleInputChange(e, "hr")}
                       placeholder="Họ và tên"
                       className="border-[#C7A59D]/40 rounded-xl px-5 py-3 bg-white/60 focus:ring-[#27592D]"
+                      error={fieldErrors.hr.name}
                     />
                     <InputField
                       name="email"
@@ -301,6 +443,7 @@ const Register = () => {
                       onChange={(e) => handleInputChange(e, "hr")}
                       placeholder="Email"
                       className="border-[#C7A59D]/40 rounded-xl px-5 py-3 bg-white/60 focus:ring-[#27592D]"
+                      error={fieldErrors.hr.email}
                     />
                     <SelectField
                       name="gender"
@@ -313,6 +456,7 @@ const Register = () => {
                         { value: "female", label: "Nữ ♀" },
                         { value: "other", label: "Khác ⚧" },
                       ]}
+                      error={fieldErrors.hr.gender}
                     />
                     <InputField
                       name="password"
@@ -321,6 +465,8 @@ const Register = () => {
                       onChange={(e) => handleInputChange(e, "hr")}
                       placeholder="Mật khẩu"
                       className="border-[#C7A59D]/40 rounded-xl px-5 py-3 bg-white/60 focus:ring-[#27592D]"
+                      togglePassword
+                      error={fieldErrors.hr.password}
                     />
                     <InputField
                       name="confirmPassword"
@@ -329,6 +475,8 @@ const Register = () => {
                       onChange={(e) => handleInputChange(e, "hr")}
                       placeholder="Nhập lại mật khẩu"
                       className="border-[#C7A59D]/40 rounded-xl px-5 py-3 bg-white/60 focus:ring-[#27592D]"
+                      togglePassword
+                      error={fieldErrors.hr.confirmPassword}
                     />
                     <InputField
                       name="inviteCode"
@@ -337,11 +485,28 @@ const Register = () => {
                       onChange={(e) => handleInputChange(e, "hr")}
                       placeholder="Mã mời"
                       className="border-[#C7A59D]/40 rounded-xl px-5 py-3 bg-white/60 focus:ring-[#27592D]"
+                      error={fieldErrors.hr.inviteCode}
                     />
+                    <div className="flex items-center gap-2 text-sm text-[#27592D]">
+                      <span>Chưa có công ty?</span>
+                      <button
+                        type="button"
+                        onClick={() => navigate("/company/create")}
+                        className="inline-flex items-center gap-1 font-semibold text-[#27592D] hover:opacity-80"
+                      >
+                        <Building2 className="w-4 h-4" />
+                        <span>Tạo mới</span>
+                      </button>
+                    </div>
                   </>
                 )}
 
                 <BrandButton onClick={handleSubmit}>Đăng ký ngay</BrandButton>
+                {error && (
+                  <div className="mt-2 text-center text-[#AA423A] text-sm">
+                    {error}
+                  </div>
+                )}
               </div>
 
               <div className="mt-6 text-center text-[#27592D]">
