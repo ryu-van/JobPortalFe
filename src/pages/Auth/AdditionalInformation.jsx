@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useRef } from "react";
-import InputField from "../components/common/InputField";
-import BrandButton from "../components/common/BrandButton";
-import { useToast } from "../components/common/ToastContext";
-import authService from "../services/authService";
-import userService from "../services/userService";
+import InputField from "../../components/form/InputField";
+import SelectField from "../../components/form/SelectField";
+import BrandButton from "../../components/form/BrandButton";
+import { useToast } from "../../components/commons/ToastContext";
+import authService from "../../services/authService";
+import userService from "../../services/userService";
 import { useNavigate } from "react-router-dom";
 import { Camera } from "lucide-react";
-import addressService from "../services/addressService";
-import SelectField from "../components/common/SelectField";
-
+import addressService from "../../services/addressService";
+import AddressSelect from "../../components/commons/AddressSelect";
 const AdditionalInformation = () => {
   const { addToast } = useToast();
   const navigate = useNavigate();
@@ -19,10 +19,8 @@ const AdditionalInformation = () => {
   const [form, setForm] = useState({
     fullName: "",
     phoneNumber: "",
-    street: "",
-    ward: "",
-    city: "",
     avatarUrl: "",
+    dateOfBirth: "",
     gender: null,
     CompanyId: null,
     roleId: null,
@@ -37,7 +35,7 @@ const AdditionalInformation = () => {
   const fileInputRef = useRef(null);
 
   const [provinces, setProvinces] = useState([]);
-  const [wards, setWards] = useState([]);
+  const [communes, setCommunes] = useState([]);
 
   useEffect(() => {
     let mounted = true;
@@ -54,6 +52,7 @@ const AdditionalInformation = () => {
         }
 
         const u = await authService.getCurrentUser();
+        console.log("AdditionalInformation getCurrentUser:", u);
         
         if (!mounted || !u) {
           return;
@@ -64,17 +63,25 @@ const AdditionalInformation = () => {
           return;
         }
         setUserId(safeId);
-        setForm(prev => ({ ...prev, ...u }));
+        setForm(prev => ({ 
+          ...prev, 
+          ...u,
+          dateOfBirth: u?.dateOfBirth ?? u?.date_of_birth ?? prev.dateOfBirth
+        }));
+        if (u?.phoneNumber) {
+          navigate("/");
+          return;
+        }
 
         if (u.city) {
-          const w = await addressService.getWardsByProvince(u.city);
+          const w = await addressService.getCommunesByProvince(u.city);
           
           if (w.success && mounted) {
-            const mappedWards = w.data.map(x => ({ 
+            const mappedCommunes = w.data.map(x => ({ 
               value: x.code || x.ward_code, 
               label: x.name || x.ward_name 
             }));
-            setWards(mappedWards);
+            setCommunes(mappedCommunes);
           }
         }
 
@@ -125,28 +132,27 @@ const AdditionalInformation = () => {
     }));
 
     if (!provinceCode) {
-      setWards([]);
+      setCommunes([]);
       return;
     }
 
     try {
-      const res = await addressService.getWardsByProvince(provinceCode);      
+      const res = await addressService.getCommunesByProvince(provinceCode);      
       if (res.success) {
-        const mappedWards = res.data.map(w => ({ 
+        const mappedCommunes = res.data.map(w => ({ 
           value: w.code || w.ward_code, 
           label: w.name || w.ward_name 
         }));
-        setWards(mappedWards);
+        setCommunes(mappedCommunes);
       } else {
-        setWards([]);
+        setCommunes([]);
       }
     } catch (error) {
-      console.error("💥 Error loading wards:", error);
-      setWards([]);
+      console.error(" Error loading communes:", error);
+      setCommunes([]);
     }
   };
 
-  // AVATAR
   const onAvatarFileChange = (e) => {
     const file = e.target.files?.[0];
     setAvatarError("");
@@ -172,13 +178,29 @@ const AdditionalInformation = () => {
     if (form.phoneNumber && !/^\+?[0-9]{9,15}$/.test(form.phoneNumber))
       next.phoneNumber = "Số điện thoại không hợp lệ";
 
+    if (!form.gender) next.gender = "Vui lòng chọn giới tính";
+
     if (!form.city) next.city = "Vui lòng chọn tỉnh/thành phố";
     if (!form.ward) next.ward = "Vui lòng chọn phường/xã";
+
+    if (!form.dateOfBirth) {
+      next.dateOfBirth = "Vui lòng chọn ngày sinh";
+    } else {
+      const dob = new Date(form.dateOfBirth);
+      const now = new Date();
+      if (isNaN(dob.getTime()) || dob > now) {
+        next.dateOfBirth = "Ngày sinh không hợp lệ";
+      } else {
+        const age = Math.floor((now - dob) / (365.25 * 24 * 60 * 60 * 1000));
+        if (age < 15 || age > 100) {
+          next.dateOfBirth = "Tuổi phải từ 15 đến 100";
+        }
+      }
+    }
 
     return next;
   };
 
-  // SUBMIT
   const onSubmit = async () => {
     const errs = validate();
     if (Object.keys(errs).length) {
@@ -200,9 +222,22 @@ const AdditionalInformation = () => {
         uploadedUrl = await userService.updateAvatar(userId, avatarFile);
       }
 
+      const selectedProvince = provinces.find(p => String(p.value) === String(form.city)) || null;
+      const selectedWard = communes.find(w => String(w.value) === String(form.ward)) || null;
+      const address = {
+        addressType: "USER",
+        provinceCode: selectedProvince?.value || form.city || "",
+        provinceName: selectedProvince?.label || "",
+        communeCode: selectedWard?.value || form.ward || "",
+        communeName: selectedWard?.label || "",
+        detailAddress: form.street || "",
+        isPrimary: true,
+      };
+
       const payload = {
         ...form,
         avatarUrl: uploadedUrl ?? form.avatarUrl,
+        address
       };
 
       await userService.updateUser(userId, payload);
@@ -218,13 +253,13 @@ const AdditionalInformation = () => {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center bg-gradient-to-br from-[#F9F9F4] via-[#F0EDE5] to-[#E7E4DC] px-4 py-8">
+    <div className="h-screen overflow-hidden relative flex items-center justify-center bg-gradient-to-br from-[#F9F9F4] via-[#F0EDE5] to-[#E7E4DC] px-4 py-8">
 
       <div className="pointer-events-none absolute w-96 h-96 bg-[#C7A59D]/30 rounded-full blur-3xl top-[-100px] left-[-100px]" />
 
       <div className="pointer-events-none absolute w-96 h-96 bg-[#27592D]/20 rounded-full blur-3xl bottom-[-120px] right-[-80px]" />
 
-      <div className="w-full max-w-md md:max-w-3xl bg-white/70 backdrop-blur-lg shadow-2xl rounded-3xl p-6 md:p-8 border border-white/30 relative z-20 mb-20">
+      <div className="w-full max-w-lg md:max-w-4xl lg:max-w-5xl bg-white/70 backdrop-blur-lg shadow-2xl rounded-3xl p-8 md:p-10 border border-white/30 relative z-20 pb-24">
         <h1 className="text-3xl text-center font-semibold text-[#27592D] mb-2">
           Thông tin bổ sung
         </h1>
@@ -260,7 +295,7 @@ const AdditionalInformation = () => {
           <p className="text-red-500 text-sm text-center mb-4">{avatarError}</p>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 relative z-30">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 relative z-30">
           <div className="relative z-40">
             <SelectField
               name="city"
@@ -279,10 +314,10 @@ const AdditionalInformation = () => {
               label="Phường/Xã"
               value={form.ward}
               onChange={updateField}
-              options={wards}
+              options={communes}
               placeholder="Chọn phường/xã"
               error={errors.ward}
-              disabled={wards.length === 0}
+              disabled={communes.length === 0}
             />
           </div>
 
@@ -305,12 +340,39 @@ const AdditionalInformation = () => {
               error={errors.phoneNumber}
             />
           </div>
+
+          <div className="relative z-30">
+            <InputField
+              label="Ngày sinh"
+              name="dateOfBirth"
+              type="date"
+              value={form.dateOfBirth}
+              onChange={updateField}
+              placeholder="Ngày sinh"
+              error={errors.dateOfBirth}
+            />
+          </div>
+
+          <div className="relative z-30">
+            <SelectField
+              name="gender"
+              label="Giới tính"
+              value={form.gender ?? ""}
+              onChange={updateField}
+              options={[
+                { value: false, label: "Nam" },
+                { value: true, label: "Nữ" },
+              ]}
+              placeholder="Chọn giới tính"
+              error={errors.gender}
+            />
+          </div>
         </div>
 
       </div>
 
       <div className="fixed bottom-4 left-4 right-4 z-[100] flex justify-between gap-3 md:left-6 md:right-6 md:bottom-6 pointer-events-none">
-        <BrandButton fullWidth={false} className="px-5 py-2 md:px-6 pointer-events-auto" onClick={() => navigate(-1)}>
+        <BrandButton fullWidth={false} className="px-5 py-2 md:px-6 pointer-events-auto" onClick={() => navigate("/")}>
           Quay lại
         </BrandButton>
         <BrandButton fullWidth={false} className="px-5 py-2 md:px-6 pointer-events-auto" disabled={loading || !userId} onClick={onSubmit}>

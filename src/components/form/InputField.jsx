@@ -11,11 +11,14 @@ export default function InputField({
   error,
   className = "",
   togglePassword = false,
+  disabled = false,
+  readOnly = false,
 }) {
   const [show, setShow] = useState(false);
   const isPassword = type === "password";
   const inputType = isPassword && togglePassword ? (show ? "text" : "password") : type;
   const inputValue = value === null || value === undefined ? "" : value;
+  const computedReadOnly = readOnly || (!onChange && (value !== undefined));
 
   return (
     <div className="flex flex-col gap-1">
@@ -27,6 +30,8 @@ export default function InputField({
           value={inputValue}
           onChange={onChange}
           placeholder={placeholder}
+          disabled={disabled}
+          readOnly={computedReadOnly}
           className={`w-full px-4 py-2 ${togglePassword && isPassword ? "pr-14" : ""} border rounded-lg focus:ring-2 focus:border-transparent outline-none transition ${
             error ? "border-red-500" : "border-gray-300"
           } ${className}`}

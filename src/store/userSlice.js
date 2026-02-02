@@ -1,13 +1,12 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  userInfo: null,
-  token: null,
+  userInfo: undefined,
   loading: false,
 };
 
 const userSlice = createSlice({
-  name: 'user',
+  name: "user",
   initialState,
   reducers: {
     loginStart: (state) => {
@@ -16,17 +15,16 @@ const userSlice = createSlice({
     loginSuccess: (state, action) => {
       state.loading = false;
       state.userInfo = action.payload.user;
-      state.token = action.payload.token;
     },
     loginFailure: (state) => {
       state.loading = false;
     },
     logout: (state) => {
       state.userInfo = null;
-      state.token = null;
     },
   },
 });
 
-export const { loginStart, loginSuccess, loginFailure, logout } = userSlice.actions;
+export const { loginStart, loginSuccess, loginFailure, logout } =
+  userSlice.actions;
 export default userSlice.reducer;

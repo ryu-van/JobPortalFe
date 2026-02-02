@@ -7,7 +7,7 @@ const authService = {
       const authResponse = res.data?.data;
       return authResponse;
     } catch (error) {
-      console.error("❌ Lỗi đăng ký:", error);
+      console.error("Lỗi đăng ký:", error);
       throw error;
     }
   },
@@ -50,7 +50,7 @@ const authService = {
     try {
       await authApi.logout();
     } catch (error) {
-      console.error("❌ Lỗi logout:", error);
+      console.error("Lỗi logout:", error);
     } finally {
       localStorage.removeItem("pending_verify_email");
       localStorage.removeItem("verify_skip_cooldown");

@@ -1,6 +1,14 @@
 import axiosClient from "./axiosClient";
+
 const userApi = {
-  updateUser: (id, data) => axiosClient.put(`/users/${id}`, data),
+  createUser: (data) => {
+    return axiosClient.post(`/users`, data);
+  },
+
+  updateUser: (id, data) => {
+    return axiosClient.put(`/users/${id}`, data);
+  },
+
   updateAvatar: (id, file) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -9,8 +17,9 @@ const userApi = {
       headers: { "Content-Type": "multipart/form-data" },
     });
   },
+
   toggleStatus: (id, status) => {
-    return axiosClient.put(`/users/status/${id}`, null, {
+    return axiosClient.patch(`/users/${id}/status`, null, {
       params: { status },
     });
   },
@@ -18,9 +27,10 @@ const userApi = {
     return axiosClient.delete(`/users/${id}`);
   },
   getUserDetail: (id) => {
-    return axiosClient.get(`/users/detail/${id}`);
+    return axiosClient.get(`/users/${id}`);
   },
-  getHRs: ({
+  getUsersByRole: ({
+    role,
     keyword,
     companyName,
     isActive,
@@ -28,30 +38,16 @@ const userApi = {
     size = 16,
     asc = "asc",
   }) => {
-    return axiosClient.get(`/users/hrs`, {
-      params: { keyword, companyName, isActive, pageNo, size, asc },
-    });
-  },
-  getCandidates: ({
-    keyword,
-    isActive,
-    pageNo = 0,
-    size = 16,
-    asc = "asc",
-  }) => {
-    return axiosClient.get(`/users/candidates`, {
-      params: { keyword, isActive, pageNo, size, asc },
-    });
-  },
-  getUsersByAdminCompany: ({
-    keyword,
-    isActive,
-    pageNo = 0,
-    size = 16,
-    asc = "asc",
-  }) => {
-    return axiosClient.get(`/users/admin-company/users`, {
-      params: { keyword, isActive, pageNo, size, asc },
+    return axiosClient.get(`/users`, {
+      params: {
+        role,
+        keyword,
+        companyName,
+        isActive,
+        pageNo,
+        size,
+        asc,
+      },
     });
   },
   getUsersInCompany: ({ companyId, keyword, isActive, asc = "asc" }) => {
@@ -60,4 +56,5 @@ const userApi = {
     });
   },
 };
+
 export default userApi;

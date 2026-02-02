@@ -1,15 +1,11 @@
 import userApi from "../api/userApi";
-
-const handleApi = async (apiCall) => {
-  try {
-    const res = await apiCall();
-    return res.data?.data;
-  } catch (error) {
-    return Promise.reject(error);
-  }
-};
+import handleApi from "../utils/handleApi";
 
 const userService = {
+  createUser(data) {
+    return handleApi(() => userApi.createUser(data));
+  },
+
   updateUser(id, data) {
     if (!id) {
       return Promise.reject(new Error("Invalid user id"));
@@ -24,7 +20,7 @@ const userService = {
     try {
       const res = await userApi.updateAvatar(id, file);
       const data = res.data?.data;
-      return typeof data === "string" ? data : (data?.url || data);
+      return typeof data === "string" ? data : data?.url || data;
     } catch (error) {
       return Promise.reject(error);
     }
@@ -42,21 +38,13 @@ const userService = {
     return handleApi(() => userApi.getUserDetail(id));
   },
 
-  getHRs(params = {}) {
-    return handleApi(() => userApi.getHRs(params));
-  },
-
-  getCandidates(params = {}) {
-    return handleApi(() => userApi.getCandidates(params));
-  },
-
-  getUsersByAdminCompany(params = {}) {
-    return handleApi(() => userApi.getUsersByAdminCompany(params));
+  getUsers(params = {}) {
+    return handleApi(() => userApi.getUsersByRole(params));
   },
 
   getUsersInCompany(params = {}) {
     return handleApi(() => userApi.getUsersInCompany(params));
-  }
+  },
 };
 
 export default userService;

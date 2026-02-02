@@ -3,8 +3,11 @@ import { useLocation, useNavigate } from "react-router-dom";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { MailCheck, HeartHandshake, Briefcase, Building2 } from "lucide-react";
-import BrandButton from "../components/common/BrandButton";
-import authService from "../services/authService";
+import BrandButton from "../../components/form/BrandButton";
+import authService from "../../services/authService";
+import { useDispatch, useSelector } from "react-redux";
+import { loginSuccess } from "../../store/userSlice";
+import { roles } from "../../constants/roles";
 const VerifyEmail = () => {
   const length = 6;
   const [values, setValues] = useState(Array(length).fill(""));
@@ -12,6 +15,9 @@ const VerifyEmail = () => {
   const refs = useRef([]);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const token = useSelector((s) => s.user.token);
+  const currentUser = useSelector((s) => s.user.userInfo);
   const { state } = useLocation();
   const email = state?.email || localStorage.getItem("pending_verify_email") || "";
   const [emailState, setEmailState] = useState(email);
@@ -76,6 +82,28 @@ const VerifyEmail = () => {
     refs.current[Math.max(0, filled - 1)]?.focus();
   };
 
+  const resolveNextRoute = (user) => {
+    if (!user) return "/";
+    const roleId = user.roleId ?? user.roleID ?? user.role_id ?? null;
+    const hasPhone = !!user.phoneNumber;
+    const companyId = user.companyId ?? user.companyID ?? user.company_id ?? user.CompanyId ?? null;
+    const hasCompany = !!companyId;
+
+    if (roleId === roles.CANDIDATE) {
+      if (!hasPhone) return "/additional-information";
+      return "/";
+    }
+
+    if (roleId === roles.HR) {
+      if (!hasCompany) return "/hr/create-company";
+      if (!hasPhone) return "/additional-information";
+      return "/";
+    }
+
+    if (!hasPhone) return "/additional-information";
+    return "/";
+  };
+
   const submit = async () => {
     if (code.length !== length) return;
     setSubmitting(true);
@@ -84,7 +112,17 @@ const VerifyEmail = () => {
       await authService.verifyEmail(code);
       localStorage.removeItem("pending_verify_email");
       localStorage.removeItem("verify_skip_cooldown");
-      navigate("/additional-information");
+      let updatedUser = null;
+      try {
+        updatedUser = await authService.getCurrentUser();
+      } catch {
+        updatedUser = currentUser;
+      }
+      if (updatedUser && token) {
+        dispatch(loginSuccess({ user: updatedUser, token }));
+      }
+      const next = resolveNextRoute(updatedUser || currentUser);
+      navigate(next);
     } catch (err) {
       setError(err.response?.data?.message || "Xác minh thất bại");
     } finally {

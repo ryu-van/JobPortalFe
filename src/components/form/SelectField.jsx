@@ -10,12 +10,14 @@ export default function SelectField({
   theme = "primary", 
   className = "",
   error,
+  size = "md",
   disabled = false,
 }) {
   const themeColor =
     theme === "secondary" ? "#788D7C" : "#5A7B4B";
   const borderColor =
     theme === "secondary" ? "#C7A59D" : "#C7A59D";
+  const sizeCls = size === "sm" ? "py-2 rounded-lg text-sm" : "py-3 rounded-xl text-sm";
 
   return (
     <div className="flex flex-col gap-1 w-full">
@@ -31,8 +33,7 @@ export default function SelectField({
           value={value}
           onChange={onChange}
           disabled={disabled}
-          aria-disabled={disabled}
-          className={`w-full appearance-none px-5 py-3 border rounded-xl bg-white/70 text-gray-700 focus:ring-2 outline-none transition duration-200 ${disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}
+          className={`w-full appearance-none px-5 ${sizeCls} border bg-white/70 text-gray-700 focus:ring-2 outline-none transition duration-200 cursor-pointer
             focus:ring-[${themeColor}] focus:border-[${borderColor}] ${error ? "border-red-500" : "border-[#C7A59D]/40"} ${className}`}
         >
           <option value="" disabled className="text-gray-400">
@@ -51,6 +52,7 @@ export default function SelectField({
           ))}
         </select>
 
+        {/* Icon mũi tên xuống */}
         <svg
           className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#5A7B4B] pointer-events-none"
           fill="none"

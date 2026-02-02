@@ -8,7 +8,6 @@ const headers = {
 };
 
 const addressService = {
-    // Lấy danh sách tỉnh/thành phố
     getProvinces: async () => {
         try {
             
@@ -31,7 +30,7 @@ const addressService = {
     },
 
     // Lấy danh sách phường/xã theo tỉnh
-    getWardsByProvince: async (provinceCode) => {
+    getCommunesByProvince: async (provinceCode) => {
         try {
             
             const url = `${BASE_URL}/new-provinces/${provinceCode}/wards?limit=5000`;

@@ -1,6 +1,6 @@
 import React from 'react'
 
-const navbar = () => {
+const CandidateForm = () => {
   return (
     <div>
       
@@ -8,4 +8,4 @@ const navbar = () => {
   )
 }
 
-export default navbar
+export default CandidateForm
