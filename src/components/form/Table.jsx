@@ -6,6 +6,7 @@ export default function Table({
   compact = false,
   emptyMessage = "Không có dữ liệu",
   className = "",
+  onRowClick,
 }) {
   return (
     <div className={`w-full overflow-x-auto ${className}`}>
@@ -33,7 +34,18 @@ export default function Table({
             data.map((row, ri) => (
               <tr
                 key={ri}
-                className={`${striped && ri % 2 === 1 ? "bg-gray-50/50" : "bg-white"} hover:bg-gray-50`}
+                className={`${striped && ri % 2 === 1 ? "bg-gray-50/50" : "bg-white"} hover:bg-gray-50 ${onRowClick ? "cursor-pointer" : ""}`}
+                onClick={(e) => {
+                  if (!onRowClick) return;
+                  if (
+                    e.target.closest(
+                      "button, a, input, select, textarea, [role='button']"
+                    )
+                  ) {
+                    return;
+                  }
+                  onRowClick(row, ri, e);
+                }}
               >
                 {columns.map((col, ci) => {
                   const content =
