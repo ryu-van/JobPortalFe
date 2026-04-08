@@ -1,15 +1,15 @@
 export const ROLE_ID = {
   ADMIN: 1,
-  HR: 2,
-  CANDIDATE: 3,
-  ADMIN_COMPANY: 4,
+  COMPANY_ADMIN: 2,
+  HR: 3,
+  CANDIDATE: 4,
 };
 
 export const ROLE_NAME = {
   ADMIN: "ADMIN",
+  COMPANY_ADMIN: "COMPANY_ADMIN",
   HR: "HR",
   CANDIDATE: "CANDIDATE",
-  ADMIN_COMPANY: "ADMIN_COMPANY",
 };
 
 export const roles = ROLE_ID;

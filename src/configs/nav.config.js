@@ -21,7 +21,7 @@ export const NAV_ITEMS = [
   {
     label: "Dashboard",
     path: "/company-admin/dashboard",
-    roles: [roles.ADMIN_COMPANY],
+    roles: [roles.COMPANY_ADMIN],
     icon: LayoutDashboard,
   },
   {
@@ -42,13 +42,13 @@ export const NAV_ITEMS = [
   {
     label: "Jobs", // Fallback for Company Admin if they have this feature
     path: "/jobs",
-    roles: [roles.ADMIN_COMPANY],
+    roles: [roles.COMPANY_ADMIN],
     icon: BriefcaseBusiness,
   },
   {
     label: "Candidates",
     path: "/candidates",
-    roles: [roles.HR, roles.ADMIN_COMPANY],
+    roles: [roles.HR, roles.COMPANY_ADMIN],
     icon: UserRoundSearch,
   },
 
@@ -56,25 +56,25 @@ export const NAV_ITEMS = [
   {
     label: "Company Profile",
     path: "/company-profile",
-    roles: [roles.ADMIN_COMPANY],
+    roles: [roles.COMPANY_ADMIN],
     icon: Building2,
   },
   {
     label: "Team Management",
     path: "/team-management",
-    roles: [roles.ADMIN_COMPANY],
+    roles: [roles.COMPANY_ADMIN],
     icon: Users,
   },
   {
     label: "Analytics",
     path: "/analytics",
-    roles: [roles.ADMIN_COMPANY],
+    roles: [roles.COMPANY_ADMIN],
     icon: BarChart3,
   },
   
   // ===== ADMIN =====
   {
-    label: "Categories",
+    label: "Categories & Industries",
     path: "/admin/categories",
     roles: [roles.ADMIN],
     icon: ChartBarStacked
@@ -85,10 +85,22 @@ export const NAV_ITEMS = [
     roles: [roles.ADMIN],
     icon: Users
   },
+  {
+    label: "Companies",
+    path: "/admin/companies",
+    roles: [roles.ADMIN],
+    icon: Building2,
+  },
+  {
+    label: "Jobs",
+    path: "/admin/jobs",
+    roles: [roles.ADMIN],
+    icon: BriefcaseBusiness,
+  },
    {
     label: "Systems",
     path: "/systems",
-    roles: [roles.HR, roles.ADMIN_COMPANY, roles.ADMIN],
+    roles: [roles.HR, roles.COMPANY_ADMIN, roles.ADMIN],
     icon: Cog,
   }
 ];
