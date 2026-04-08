@@ -2,38 +2,76 @@ import companyApi from "../api/companyApi";
 import handleApi from "../utils/handleApi";
 
 const companyService = {
-    getVerificationRequests: (filters) =>
-        handleApi(() => companyApi.getVerificationRequests(filters)),
+  // ─── Company ────────────────────────────────────────────────────────────────
 
-    getAllCompanies: (filters) =>
-        handleApi(() => companyApi.getAllCompanies(filters)),
+  getAllCompanies: (filters) =>
+    handleApi(() => companyApi.getAllCompanies(filters)),
 
-    createCompanyVerificationRequest: (data, documents) =>
-        handleApi(() => companyApi.createCompanyVerificationRequest(data, documents)),
+  getCompanyDropdown: (keyword) =>
+    handleApi(() => companyApi.getCompanyDropdown(keyword)),
 
-    getCompanyDetail: (companyId) =>
-        handleApi(() => companyApi.getCompanyDetail(companyId)),
+  getCompanyDetail: (companyId) =>
+    handleApi(() => companyApi.getCompanyDetail(companyId)),
 
-    getCompanyVerificationRequestDetail: (requestId) =>
-        handleApi(() => companyApi.getCompanyVerificationRequestDetail(requestId)),
+  updateCompany: (companyId, data, file) =>
+    handleApi(() => companyApi.updateCompany(companyId, data, file)),
 
-    getVerificationRequestByCompanyId: (companyId) =>
-        handleApi(() => companyApi.getVerificationRequestByCompanyId(companyId)),
+  deleteCompany: (companyId) =>
+    handleApi(() => companyApi.deleteCompany(companyId)),
 
-    changeCompanyStatus: (companyId, isActive) =>
-        handleApi(() => companyApi.changeCompanyStatus(companyId, isActive)),
+  changeCompanyStatus: (companyId, isActive) =>
+    handleApi(() => companyApi.changeCompanyStatus(companyId, isActive)),
 
-    updateCompany: (companyId, data, file) =>
-        handleApi(() => companyApi.updateCompany(companyId, data, file)),
+  // ─── Invitations ────────────────────────────────────────────────────────────
 
-    deleteCompany: (companyId) =>
-        handleApi(() => companyApi.deleteCompany(companyId)),
+  createInvitation: (companyId, payload) =>
+    handleApi(() => companyApi.createInvitation(companyId, payload)),
 
-    reviewCompanyVerificationRequest: (payload) =>
-        handleApi(() => companyApi.reviewCompanyVerificationRequest(payload)),
+  // ─── Verification Requests ───────────────────────────────────────────────────
 
-    createInvitation: (payload) =>
-        handleApi(() => companyApi.createInvitation(payload))
+  getVerificationRequests: (filters) =>
+    handleApi(() => companyApi.getVerificationRequests(filters)),
+
+  createCompanyVerificationRequest: (data, logo, documents) =>
+    handleApi(() =>
+      companyApi.createCompanyVerificationRequest(data, logo, documents),
+    ),
+
+  updateCompanyVerificationRequest: (requestId, data, logo, documents) =>
+    handleApi(() =>
+      companyApi.updateCompanyVerificationRequest(
+        requestId,
+        data,
+        logo,
+        documents,
+      ),
+    ),
+
+  getVerificationRequestDetail: (requestId) =>
+    handleApi(() => companyApi.getVerificationRequestDetail(requestId)),
+
+  getVerificationRequestByCompanyId: (companyId) =>
+    handleApi(() => companyApi.getVerificationRequestByCompanyId(companyId)),
+
+  reviewCompanyVerificationRequest: (requestId, payload) =>
+    handleApi(() =>
+      companyApi.reviewCompanyVerificationRequest(requestId, payload),
+    ),
+  // ─── Industry ───────────────────────────────────────────────────
+  getAllIndustries: (name) =>
+    handleApi(() => companyApi.getAllIndustries(name)),
+
+  getIndustryDetail: (id) => handleApi(() => companyApi.getIndustryDetail(id)),
+
+  createIndustry: (data) => handleApi(() => companyApi.createIndustry(data)),
+
+  updateIndustry: (id, data) =>
+    handleApi(() => companyApi.updateIndustry(id, data)),
+
+  changeIndustryStatus: (id, isActive) =>
+    handleApi(() => companyApi.changeIndustryStatus(id, isActive)),
+
+  deleteIndustry: (id) => handleApi(() => companyApi.deleteIndustry(id)),
 };
 
 export default companyService;

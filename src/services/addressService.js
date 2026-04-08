@@ -29,7 +29,37 @@ const addressService = {
         }
     },
 
-    // Lấy danh sách phường/xã theo tỉnh
+    // Lấy danh sách quận/huyện theo tỉnh
+    getDistrictsByProvince: async (provinceCode) => {
+        try {
+            const url = `${BASE_URL}/new-provinces/${provinceCode}/districts?limit=100`;
+            const res = await fetch(url, { headers });
+            const json = await res.json();
+            if (!json.success) return { success: false, data: [] };
+            const districts = Array.isArray(json.data) ? json.data : (json.data?.districts || []);
+            return { success: true, data: districts };
+        } catch (error) {
+            console.error("Error fetching districts:", error);
+            return { success: false, data: [] };
+        }
+    },
+
+    // Lấy danh sách phường/xã theo quận/huyện
+    getCommunesByDistrict: async (districtCode) => {
+        try {
+            const url = `${BASE_URL}/new-districts/${districtCode}/wards?limit=100`;
+            const res = await fetch(url, { headers });
+            const json = await res.json();
+            if (!json.success) return { success: false, data: [] };
+            const wards = Array.isArray(json.data) ? json.data : (json.data?.wards || []);
+            return { success: true, data: wards };
+        } catch (error) {
+            console.error("Error fetching wards by district:", error);
+            return { success: false, data: [] };
+        }
+    },
+
+    // Lấy danh sách phường/xã theo tỉnh (vẫn giữ lại cho các phần khác dùng)
     getCommunesByProvince: async (provinceCode) => {
         try {
             

@@ -1,6 +1,64 @@
 import axiosClient from "./axiosClient";
 
 const companyApi = {
+  // ─── Company ────────────────────────────────────────────────────────────────
+
+  getAllCompanies: ({ keyword, location, isActive, page = 0, size = 16 }) => {
+    return axiosClient.get("/companies", {
+      params: { keyword, location, isActive, page, size },
+    });
+  },
+
+  getCompanyDropdown: (keyword) => {
+    return axiosClient.get("/companies/dropdown", {
+      params: { keyword },
+    });
+  },
+
+  getCompanyDetail: (companyId) => {
+    return axiosClient.get(`/companies/${companyId}`);
+  },
+
+  updateCompany: (companyId, data, file) => {
+    const formData = new FormData();
+
+    formData.append(
+      "companyRequest",
+      new Blob([JSON.stringify(data)], { type: "application/json" })
+    );
+
+    if (file) {
+      formData.append("file", file);
+    }
+
+    return axiosClient.put(`/companies/${companyId}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+
+  deleteCompany: (companyId) => {
+    return axiosClient.delete(`/companies/${companyId}`);
+  },
+
+  changeCompanyStatus: (companyId, isActive) => {
+    return axiosClient.patch(`/companies/${companyId}/status`, null, {
+      params: { isActive },
+    });
+  },
+
+  // ─── Invitations ────────────────────────────────────────────────────────────
+
+  createInvitation: (companyId, { createdById, email, maxUses, expiresInHours }) => {
+    return axiosClient.post(`/companies/${companyId}/invitations`, {
+      createdById,
+      email,
+      maxUses,
+      expiresInHours,
+    });
+  },
+
+  // ─── Verification Requests ───────────────────────────────────────────────────
+
   getVerificationRequests: ({
     keyword,
     verifyStatus,
@@ -13,77 +71,90 @@ const companyApi = {
     });
   },
 
-  getAllCompanies: ({ keyword, location, isActive, page = 0, size = 16 }) => {
-    return axiosClient.get("/companies", {
-      params: { keyword, location, isActive, page, size },
-    });
-  },
-  createCompanyVerificationRequest: (data, documents) => {
+  createCompanyVerificationRequest: (data, logo, documents) => {
     const formData = new FormData();
     formData.append(
-      "data",
+      "companyRequest",
       new Blob([JSON.stringify(data)], { type: "application/json" })
     );
 
-    documents?.forEach((file) => {
-      formData.append("documents", file);
+    if (logo) {
+      formData.append("file", logo);
+    }
+
+    documents?.forEach((item) => {
+      formData.append("documents", item.file || item);
     });
 
     return axiosClient.post("/companies/requests", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
   },
-  getCompanyDetail: (companyId) => {
-    return axiosClient.get(`/companies/${companyId}`);
-  },
-  getCompanyVerificationRequestDetail: (requestId) => {
-    return axiosClient.get(`/companies/requests/detail/${requestId}`);
-  },
 
-  getVerificationRequestByCompanyId: (companyId) => {
-    return axiosClient.get(`/companies/requests/company/${companyId}`);
-  },
-  changeCompanyStatus: (companyId, isActive) => {
-    return axiosClient.put(`/companies/${companyId}/status`, null, {
-      params: { isActive },
-    });
-  },
-  updateCompany: (companyId, data, file) => {
+  updateCompanyVerificationRequest: (requestId, data, logo, documents) => {
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append(
+      "companyRequest",
+      new Blob([JSON.stringify(data)], { type: "application/json" })
+    );
 
-    Object.keys(data).forEach((key) => {
-      formData.append(key, data[key]);
+    if (logo) {
+      formData.append("file", logo);
+    }
+
+    documents?.forEach((item) => {
+      formData.append("documents", item.file || item);
     });
 
-    return axiosClient.put(`/companies/${companyId}`, formData, {
+    return axiosClient.put(`/companies/requests/${requestId}`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
   },
-  deleteCompany: (companyId) => {
-    return axiosClient.delete(`/companies/${companyId}`);
+
+  getVerificationRequestDetail: (requestId) => {
+    return axiosClient.get(`/companies/requests/${requestId}`);
   },
-  reviewCompanyVerificationRequest: ({
-    requestId,
-    reviewedById,
-    isApproved,
-    reason,
-  }) => {
-    return axiosClient.put(`/companies/requests/${requestId}/review`, null, {
-      params: { reviewedById, isApproved, reason },
+
+  getVerificationRequestByCompanyId: (companyId) => {
+    return axiosClient.get(`/companies/${companyId}/requests`);
+  },
+
+  reviewCompanyVerificationRequest: (requestId, { reviewedById, isApproved, reason }) => {
+    return axiosClient.put(`/companies/requests/${requestId}/review`, {
+      reviewedById,
+      isApproved,
+      reason,
     });
   },
-  createInvitation: ({
-    companyId,
-    createdById,
-    email,
-    maxUses,
-    expiresInHours,
-  }) => {
-    return axiosClient.post("/companies/invitations", null, {
-      params: { companyId, createdById, email, maxUses, expiresInHours },
+  // ─── Industry ───────────────────────────────────────────────────
+  getAllIndustries: (name) => {
+    return axiosClient.get("/companies/industries", {
+      params: { name },
     });
   },
+ 
+  getIndustryDetail: (id) => {
+    return axiosClient.get(`/companies/industries/${id}`);
+  },
+ 
+  createIndustry: (data) => {
+    return axiosClient.post("/companies/industries", data);
+  },
+ 
+  updateIndustry: (id, data) => {
+    return axiosClient.put(`/companies/industries/${id}`, data);
+  },
+ 
+  changeIndustryStatus: (id, isActive) => {
+    return axiosClient.patch(`/companies/industries/${id}/status`, null, {
+      params: { isActive },
+    });
+  },
+ 
+  deleteIndustry: (id) => {
+    return axiosClient.delete(`/companies/industries/${id}`);
+  },
+
 };
 
 export default companyApi;

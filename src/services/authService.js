@@ -1,10 +1,17 @@
 import authApi from "../api/authApi";
+import { ROLE_ID } from "../constants/roles";
 
 const authService = {
   async register(data) {
     try {
       const res = await authApi.register(data);
       const authResponse = res.data?.data;
+      
+      // If authResponse doesn't have a user property, it might be the user object itself
+      if (authResponse && !authResponse.user) {
+        return { user: authResponse };
+      }
+      
       return authResponse;
     } catch (error) {
       console.error("Lỗi đăng ký:", error);
@@ -25,22 +32,33 @@ const authService = {
   determinePostLoginRoute(data) {
     const u = data.user;
 
-    if (!u.emailVerified) {
+    if (!u.isEmailVerified) {
+      localStorage.setItem("pending_verify_email", u.email);
+      localStorage.setItem("verify_skip_cooldown", "0");
+
       return {
         path: "/verify",
         state: {
           email: u.email,
           skipCooldown: false,
         },
-        localStorage: {
-          pending_verify_email: u.email,
-          verify_skip_cooldown: "0",
-        },
       };
     }
 
     if (!u.phoneNumber) {
       return { path: "/additional-information" };
+    }
+
+    if (u.roleId === ROLE_ID.ADMIN) {
+      return { path: "/admin/dashboard" };
+    }
+
+    if (u.roleId === ROLE_ID.COMPANY_ADMIN) {
+      return { path: "/company-admin/dashboard" };
+    }
+
+    if (u.roleId === ROLE_ID.HR) {
+      return { path: "/hr/dashboard" };
     }
 
     return { path: "/" };

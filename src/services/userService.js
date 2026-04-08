@@ -2,8 +2,8 @@ import userApi from "../api/userApi";
 import handleApi from "../utils/handleApi";
 
 const userService = {
-  createUser(data) {
-    return handleApi(() => userApi.createUser(data));
+  createUser(data, avatarFile) {
+    return handleApi(() => userApi.createUser(data, avatarFile));
   },
 
   updateUser(id, data) {
@@ -48,4 +48,3 @@ const userService = {
 };
 
 export default userService;
-

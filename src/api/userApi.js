@@ -1,8 +1,21 @@
 import axiosClient from "./axiosClient";
 
 const userApi = {
-  createUser: (data) => {
-    return axiosClient.post(`/users`, data);
+  createUser: (payload, avatarFile) => {
+    const formData = new FormData();
+
+    formData.append(
+      "createUserRequest",
+      new Blob([JSON.stringify(payload)], { type: "application/json" }),
+    );
+
+    if (avatarFile) {
+      formData.append("avatar", avatarFile);
+    }
+
+    return axiosClient.post(`/users`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
   },
 
   updateUser: (id, data) => {
