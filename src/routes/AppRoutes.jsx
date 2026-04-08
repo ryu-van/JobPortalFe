@@ -16,12 +16,22 @@ const Login = lazy(() => import('../pages/Auth/Login'))
 const CompanyCreate = lazy(() => import('../pages/Auth/RequestNewComany'))
 const AdditionalInformation = lazy(() => import('../pages/Auth/AdditionalInformation'))
 const Home = lazy(() => import('../pages/Home'))
+const Jobs = lazy(() => import('../pages/Jobs'))
+const Companies = lazy(() => import('../pages/Companies'))
+const SavedJobs = lazy(() => import('../pages/SavedJobs'))
+const Profile = lazy(() => import('../pages/Profile'))
+const CompanyDetail = lazy(() => import('../pages/CompanyDetail'))
+const JobDetail = lazy(() => import('../pages/JobDetail'))
 const AdminLayout = lazy(() => import('../components/layout/AdminLayout'))
 const Dashboard = lazy(() => import('../pages/Admin/Dashboard'))
 const Job = lazy(() => import('../pages/Admin/Job/Jobs'))
+const JobForm = lazy(() => import('../pages/Admin/Job/JobForm'))
 const Categories = lazy(() => import('../pages/Admin/Category/categories'))
 const Users = lazy(() => import('../pages/Admin/User/Users'))
-const UserForm = lazy(() => import('../pages/Admin/User/AdminForm'))
+const UserForm = lazy(() => import('../pages/Admin/User/UserForm'))
+const AdminCompanies = lazy(() => import('../pages/Admin/Company/Companies'))
+const CompanyForm = lazy(() => import('../pages/Admin/Company/CompanyForm'))
+
 
 function ProtectedRoute({ children }) {
   const user = useSelector((s) => s.user.userInfo);
@@ -59,7 +69,7 @@ function ProtectedRoute({ children }) {
     return <Navigate to="/login" replace />;
   }
 
-  if (user && user.emailVerified === false && loc.pathname !== "/verify") {
+  if (user && user.isEmailVerified === false && loc.pathname !== "/verify") {
     return <Navigate to="/verify" replace state={{ email: user.email, skipCooldown: false }} />;
   }
 
@@ -85,7 +95,7 @@ function AnimatedRoutes() {
           <Route path="/login" element={<Login />} />
           <Route path="/create-company" element={
             <ProtectedRoute>
-              <RequireRole roles={[roles.HR,roles.ADMIN_COMPANY]} fallback="/">
+              <RequireRole roles={[roles.HR,roles.COMPANY_ADMIN]} fallback="/">
                 <CompanyCreate />
               </RequireRole>
             </ProtectedRoute>
@@ -98,17 +108,16 @@ function AnimatedRoutes() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/" element={<Home />} />
+          <Route path="/jobs" element={<Jobs />} />
+          <Route path="/jobs/:id" element={<JobDetail />} />
+          <Route path="/companies" element={<Companies />} />
+          <Route path="/companies/:id" element={<CompanyDetail />} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/saved-jobs" element={<ProtectedRoute><SavedJobs /></ProtectedRoute>} />
           <Route element={
             <ProtectedRoute>
-              <RequireRole roles={[roles.ADMIN_COMPANY, roles.ADMIN]} fallback="/">
+              <RequireRole roles={[roles.COMPANY_ADMIN, roles.ADMIN]} fallback="/">
                 <SidebarProvider>
                   <AdminLayout />
                 </SidebarProvider>
@@ -135,6 +144,9 @@ function AnimatedRoutes() {
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="jobs" element={<Job />} />
+            <Route path="jobs/new" element={<JobForm />} />
+            <Route path="jobs/:id" element={<JobForm />} />
+            <Route path="jobs/:id/edit" element={<JobForm />} />
           </Route>
           <Route
             path="/admin"
@@ -155,6 +167,16 @@ function AnimatedRoutes() {
             <Route path='users/new' element={<UserForm />}/>
             <Route path='users/:id' element={<UserForm />}/>
             <Route path='users/:id/edit' element={<UserForm />}/>
+            <Route path='companies' element={<AdminCompanies />}/>
+            <Route path='companies/new' element={<CompanyForm />}/>
+            <Route path='companies/:id' element={<CompanyForm />}/>
+            <Route path='companies/:id/edit' element={<CompanyForm />}/>
+            <Route path='companies/requests/:id' element={<CompanyForm isRequest={true} />}/>
+            <Route path='companies/requests/:id/edit' element={<CompanyForm isRequest={true} />}/>
+            <Route path='jobs' element={<Job />}/>
+            <Route path='jobs/new' element={<JobForm />}/>
+            <Route path='jobs/:id' element={<JobForm />}/>
+            <Route path='jobs/:id/edit' element={<JobForm />}/>
           </Route>
         </Routes>
       </Suspense>
