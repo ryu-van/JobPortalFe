@@ -1,13 +1,15 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Search, CirclePlus } from "lucide-react";
+import { Search, CirclePlus, Pencil, Trash2, Power, PowerOff } from "lucide-react";
 import userService from "../../../services/userService";
 import Table from "../../../components/form/Table";
 import InputField from "../../../components/form/InputField";
 import SelectField from "../../../components/form/SelectField";
-import Pagination from "../../../components/form/Pagination";
+import Pagination from "../../../components/commons/Pagination";
 import ConfirmModal from "../../../components/commons/ConfirmModal";
 import BrandButton from "../../../components/form/BrandButton";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../../../components/commons/ToastContext";
+
 const Users = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -21,7 +23,10 @@ const Users = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmUser, setConfirmUser] = useState(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
   const navigate = useNavigate();
+  const { addToast } = useToast();
 
   const statusOptions = [
     { value: "all", label: "Tất cả" },
@@ -31,10 +36,10 @@ const Users = () => {
 
   const roleOptions = [
     { value: "", label: "Tất cả vai trò" },
-    { value: "CANDIDATE", label: "Ứng viên" },
-    { value: "HR", label: "Nhà tuyển dụng" },
-    { value: "ADMIN_COMPANY", label: "Admin công ty" },
     { value: "ADMIN", label: "Admin hệ thống" },
+    { value: "COMPANY_ADMIN", label: "Admin công ty" },
+    { value: "HR", label: "Nhà tuyển dụng" },
+    { value: "CANDIDATE", label: "Ứng viên" },
   ];
 
   const fetchUsers = useCallback(async () => {
@@ -51,14 +56,14 @@ const Users = () => {
       const data = await userService.getUsers(params);
       const list = Array.isArray(data)
         ? data
-        : data?.items || data?.content || data?.list || [];
+        : data?.data  || [];
       const totalItems =
-        data?.totalItems || data?.total || data?.count || list.length || 0;
+        data?.pagination?.totalElements || data?.totalItems || data?.total || data?.count || list.length || 0;
       setItems(list);
       setTotal(totalItems);
     } catch (err) {
       setError(
-        err.friendlyMessage || "An error occurred while fetching users."
+        err.friendlyMessage || "An error occurred while fetching users.",
       );
       setItems([]);
       setTotal(0);
@@ -75,7 +80,7 @@ const Users = () => {
       fetchUsers();
     } catch (err) {
       setError(
-        err.friendlyMessage || "An error occurred while toggling user status."
+        err.friendlyMessage || "An error occurred while toggling user status.",
       );
     }
   };
@@ -103,6 +108,28 @@ const Users = () => {
     setConfirmOpen(false);
     setConfirmUser(null);
   };
+
+  const openDeleteConfirm = (user) => {
+    setUserToDelete(user);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+    setConfirmLoading(true);
+    try {
+      await userService.deleteUser(userToDelete.id);
+      addToast("success", "Xóa người dùng thành công");
+      setDeleteConfirmOpen(false);
+      setUserToDelete(null);
+      fetchUsers();
+    } catch (err) {
+      addToast("error", err.friendlyMessage || "Có lỗi xảy ra khi xóa người dùng");
+    } finally {
+      setConfirmLoading(false);
+    }
+  };
+
   const handleViewDetail = (id) => {
     navigate(`/admin/users/${id}`);
   };
@@ -136,12 +163,14 @@ const Users = () => {
       normalized === "active"
         ? "Hoạt động"
         : normalized === "inactive"
-        ? "Ngừng hoạt động"
-        : normalized === "blocked"
-        ? "Bị khóa"
-        : "Không xác định";
+          ? "Ngừng hoạt động"
+          : normalized === "blocked"
+            ? "Bị khóa"
+            : "Không xác định";
     return (
-      <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs border ${cls}`}>
+      <span
+        className={`inline-flex items-center px-3 py-1 rounded-lg text-xs border ${cls}`}
+      >
         {label}
       </span>
     );
@@ -155,9 +184,7 @@ const Users = () => {
           <span className="font-medium text-gray-900">
             {row.fullName || "-"}
           </span>
-          <span className="text-xs text-gray-500">
-            {row.email || ""}
-          </span>
+          <span className="text-xs text-gray-500">{row.email || ""}</span>
         </div>
       ),
     },
@@ -165,11 +192,9 @@ const Users = () => {
       header: "Mã người dùng",
       render: (row) => (
         <div className="flex flex-col">
-          <span className="text-gray-700 text-sm">
-            {row.code || "-"}
-            </span>
+          <span className="text-gray-700 text-sm">{row.code || "-"}</span>
         </div>
-      )
+      ),
     },
     {
       header: "Số điện thoại",
@@ -179,16 +204,25 @@ const Users = () => {
             {row.phoneNumber || "-"}
           </span>
         </div>
-      )
+      ),
     },
     {
       header: "Giới tính",
       render: (row) => {
+        const g = String(row.gender ?? "")
+          .trim()
+          .toUpperCase();
+
+        const genderMap = {
+          MALE: "Nam",
+          FEMALE: "Nữ",
+          OTHER: "Khác",
+          PREFER_NOT_TO_SAY: "Không muốn tiết lộ",
+        };
+
         return (
           <div className="flex flex-col">
-            <span className="text-gray-700 text-sm">
-              {row.gender === false ? "Nam" : row.gender === true ? "Nữ" : "-"}
-            </span>
+            <span className="text-gray-700 text-sm">{genderMap[g] || "-"}</span>
           </div>
         );
       },
@@ -196,28 +230,21 @@ const Users = () => {
     {
       header: "Vai trò",
       render: (row) => {
-        const r =
-          row.roleName ||
-          "";
-        return <span className="text-gray-700 text-sm">{String(r || "-")}</span>;
+        const r = row.roleName || "";
+        return (
+          <span className="text-gray-700 text-sm">{String(r || "-")}</span>
+        );
       },
     },
     {
       header: "Công ty",
       render: (row) => {
         const name =
-          row.companyName ??
-          row.company_name ??
-          row.company?.name ??
-          "";
+          row.companyName ?? row.company_name ?? row.company?.name ?? "";
         if (!name) {
           return <span className="text-gray-400 text-sm"></span>;
         }
-        return (
-          <span className="text-gray-700 text-sm">
-            {name}
-          </span>
-        );
+        return <span className="text-gray-700 text-sm">{name}</span>;
       },
     },
     {
@@ -228,43 +255,45 @@ const Users = () => {
             row.is_active ??
             row.active ??
             row.status ??
-            row.state
+            row.state,
         ),
     },
     {
       header: "Hành động",
       render: (row) => {
-        const isActive =
-          row.isActive ?? row.is_active ?? row.active ?? false;
+        const isActive = row.isActive ?? row.is_active ?? row.active ?? false;
 
         return (
-          <div className="flex flex-wrap gap-2 justify-start">
+          <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => handleViewDetail(row.id)}
-              className="inline-flex items-center justify-center px-3 md:px-4 py-1.5 text-xs md:text-sm rounded-lg border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+              onClick={() => handleUpdate(row.id)}
+              className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+              title="Cập nhật"
             >
-              Chi tiết
+              <Pencil className="w-5 h-5 text-blue-600" />
             </button>
 
             <button
               type="button"
               onClick={() => openToggleConfirm(row)}
-              className={
-                isActive
-                  ? "inline-flex items-center justify-center px-3 md:px-4 py-1.5 text-xs md:text-sm rounded-lg border border-red-200 text-red-700 bg-red-50 hover:bg-red-100 transition-colors"
-                  : "inline-flex items-center justify-center px-3 md:px-4 py-1.5 text-xs md:text-sm rounded-lg border border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors"
-              }
+              className={`p-2 rounded-lg transition-all ${
+                isActive 
+                  ? "text-amber-500 hover:bg-amber-50 hover:text-amber-600" 
+                  : "text-emerald-500 hover:bg-emerald-50 hover:text-emerald-600"
+              }`}
+              title={isActive ? "Ngưng hoạt động" : "Kích hoạt"}
             >
-              {isActive ? "Ngưng hoạt động" : "Kích hoạt"}
+              {isActive ? <PowerOff className="w-5 h-5" /> : <Power className="w-5 h-5" />}
             </button>
 
             <button
               type="button"
-              onClick={() => handleUpdate(row.id)}
-              className="inline-flex items-center justify-center px-3 md:px-4 py-1.5 text-xs md:text-sm rounded-lg border border-[#1f4022] text-white bg-black hover:bg-[#1f4022] transition-colors"
+              onClick={() => openDeleteConfirm(row)}
+              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+              title="Xóa người dùng"
             >
-              Cập nhật
+              <Trash2 className="w-5 h-5 text-red-600" />
             </button>
           </div>
         );
@@ -273,10 +302,10 @@ const Users = () => {
   ];
 
   const confirmIsActive = confirmUser
-    ? confirmUser.isActive ??
+    ? (confirmUser.isActive ??
       confirmUser.is_active ??
       confirmUser.active ??
-      false
+      false)
     : false;
 
   const confirmTitle = confirmIsActive
@@ -308,7 +337,9 @@ const Users = () => {
           fullWidth={false}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white bg-[#27592D] hover:bg-[#1f4022] transition shadow"
         >
-          <span><CirclePlus className="w-5 h-5" /></span>
+          <span>
+            <CirclePlus className="w-5 h-5" />
+          </span>
           Thêm mới
         </BrandButton>
       </div>
@@ -375,14 +406,11 @@ const Users = () => {
               columns={columns}
               data={items}
               emptyMessage="Không có người dùng nào"
+              onRowClick={(row) => handleViewDetail(row.id)}
             />
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 px-2">
               <div className="text-sm text-gray-600">
-                Hiển thị{" "}
-                {total === 0
-                  ? 0
-                  : (page - 1) * size + 1}
-                -
+                Hiển thị {total === 0 ? 0 : (page - 1) * size + 1}-
                 {Math.min(page * size, total)} trong {total}
               </div>
               <div className="flex items-center gap-3">
@@ -404,7 +432,7 @@ const Users = () => {
                   currentPage={page}
                   totalPages={Math.max(
                     1,
-                    Math.ceil((total || 0) / Math.max(1, size))
+                    Math.ceil((total || 0) / Math.max(1, size)),
                   )}
                   onPageChange={setPage}
                 />
@@ -419,14 +447,23 @@ const Users = () => {
         title={confirmTitle}
         description={confirmDescription}
         confirmText={
-          confirmIsActive
-            ? "Xác nhận ngưng hoạt động"
-            : "Xác nhận kích hoạt"
+          confirmIsActive ? "Xác nhận ngưng hoạt động" : "Xác nhận kích hoạt"
         }
         cancelText="Hủy"
         loading={confirmLoading}
         onConfirm={handleConfirmToggle}
         onCancel={handleCancelToggle}
+      />
+      <ConfirmModal
+        open={deleteConfirmOpen}
+        variant="danger"
+        title="Xóa người dùng"
+        description={`Bạn có chắc chắn muốn xóa người dùng ${userToDelete?.fullName || userToDelete?.email || ""}? Hành động này không thể hoàn tác.`}
+        confirmText="Xác nhận xóa"
+        cancelText="Hủy"
+        loading={confirmLoading}
+        onConfirm={handleDeleteUser}
+        onCancel={() => setDeleteConfirmOpen(false)}
       />
     </div>
   );
