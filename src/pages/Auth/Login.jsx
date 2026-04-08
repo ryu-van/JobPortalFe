@@ -41,7 +41,7 @@ const Login = () => {
     dispatch(loginStart());
     try {
       const data = await authService.login(email, password);
-      dispatch(loginSuccess({ user: data.user }));
+      dispatch(loginSuccess({ user: data.user, token: data.accessToken }));
       const next = authService.determinePostLoginRoute(data);
       navigate(next.path, { replace: true, state: next.state });
     } catch (err) {

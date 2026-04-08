@@ -6,8 +6,8 @@ import { useToast } from "../../components/commons/ToastContext";
 import authService from "../../services/authService";
 import userService from "../../services/userService";
 import { useNavigate } from "react-router-dom";
-import { Camera } from "lucide-react";
-import addressService from "../../services/addressService";
+import { Camera, MapPin, User, Info, Pencil, Plus, Image as ImageIcon } from "lucide-react";
+import { roles } from "../../constants/roles";
 import AddressSelect from "../../components/commons/AddressSelect";
 const AdditionalInformation = () => {
   const { addToast } = useToast();
@@ -34,26 +34,14 @@ const AdditionalInformation = () => {
   const [avatarFile, setAvatarFile] = useState(null);
   const fileInputRef = useRef(null);
 
-  const [provinces, setProvinces] = useState([]);
-  const [communes, setCommunes] = useState([]);
-
   useEffect(() => {
     let mounted = true;
 
     (async () => {
       try {
-        const p = await addressService.getProvinces();
-        if (p.success && mounted) {
-          const mapped = p.data.map(x => ({ 
-            value: x.code || x.province_code, 
-            label: x.name || x.province_name 
-          }));
-          setProvinces(mapped);
-        }
-
         const u = await authService.getCurrentUser();
         console.log("AdditionalInformation getCurrentUser:", u);
-        
+
         if (!mounted || !u) {
           return;
         }
@@ -63,94 +51,56 @@ const AdditionalInformation = () => {
           return;
         }
         setUserId(safeId);
-        setForm(prev => ({ 
-          ...prev, 
+        const addr = u.address || {};
+        setForm((prev) => ({
+          ...prev,
           ...u,
-          dateOfBirth: u?.dateOfBirth ?? u?.date_of_birth ?? prev.dateOfBirth
+          gender: u?.gender ? String(u.gender).toUpperCase() : prev.gender,
+          dateOfBirth: u?.dateOfBirth ?? u?.date_of_birth ?? prev.dateOfBirth,
+          city: addr.provinceCode || "",
+          provinceName: addr.provinceName || "",
+          ward: addr.communeCode || "",
+          communeName: addr.communeName || "",
+          street: addr.detailAddress || "",
         }));
         if (u?.phoneNumber) {
           navigate("/");
           return;
         }
 
-        if (u.city) {
-          const w = await addressService.getCommunesByProvince(u.city);
-          
-          if (w.success && mounted) {
-            const mappedCommunes = w.data.map(x => ({ 
-              value: x.code || x.ward_code, 
-              label: x.name || x.ward_name 
-            }));
-            setCommunes(mappedCommunes);
-          }
-        }
-
         const initialAvatar = u.avatarUrl || u.avatar || "";
         if (initialAvatar && /^https?:\/\/.+/.test(initialAvatar)) {
           setAvatarPreview(initialAvatar);
         }
-
       } catch (error) {
         console.error("Error details:", {
           message: error.message,
           response: error.response?.data,
-          status: error.response?.status
+          status: error.response?.status,
         });
-        
-        if (mounted) {
-          try {
-            const p = await addressService.getProvinces();
-            if (p.success) {
-              const mapped = p.data.map(x => ({ 
-                value: x.code || x.province_code, 
-                label: x.name || x.province_name 
-              }));
-              setProvinces(mapped);
-            }
-          } catch (provinceError) {
-            console.error("Failed to load provinces after user error:", provinceError);
-          }
-        }
       }
     })();
 
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const updateField = (e) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-    setErrors(prev => ({ ...prev, [name]: "" }));
+    setForm((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const handleCityChange = async (e) => {
-    const provinceCode = e.target.value;
-    setForm(prev => ({
+  const handleAddressChange = (val) => {
+    setForm((prev) => ({
       ...prev,
-      city: provinceCode,
-      ward: "",
+      city: val.provinceCode,
+      provinceName: val.provinceName,
+      ward: val.communeCode,
+      communeName: val.communeName,
     }));
-
-    if (!provinceCode) {
-      setCommunes([]);
-      return;
-    }
-
-    try {
-      const res = await addressService.getCommunesByProvince(provinceCode);      
-      if (res.success) {
-        const mappedCommunes = res.data.map(w => ({ 
-          value: w.code || w.ward_code, 
-          label: w.name || w.ward_name 
-        }));
-        setCommunes(mappedCommunes);
-      } else {
-        setCommunes([]);
-      }
-    } catch (error) {
-      console.error(" Error loading communes:", error);
-      setCommunes([]);
-    }
+    setErrors((prev) => ({ ...prev, city: "", ward: "" }));
   };
 
   const onAvatarFileChange = (e) => {
@@ -222,14 +172,12 @@ const AdditionalInformation = () => {
         uploadedUrl = await userService.updateAvatar(userId, avatarFile);
       }
 
-      const selectedProvince = provinces.find(p => String(p.value) === String(form.city)) || null;
-      const selectedWard = communes.find(w => String(w.value) === String(form.ward)) || null;
-      const address = {
-        addressType: "USER",
-        provinceCode: selectedProvince?.value || form.city || "",
-        provinceName: selectedProvince?.label || "",
-        communeCode: selectedWard?.value || form.ward || "",
-        communeName: selectedWard?.label || "",
+      const addressRequest = {
+        addressType: "HOME",
+        provinceCode: form.city || "",
+        provinceName: form.provinceName || "",
+        communeCode: form.ward || "",
+        communeName: form.communeName || "",
         detailAddress: form.street || "",
         isPrimary: true,
       };
@@ -237,14 +185,24 @@ const AdditionalInformation = () => {
       const payload = {
         ...form,
         avatarUrl: uploadedUrl ?? form.avatarUrl,
-        address
+        addressRequest,
       };
 
       await userService.updateUser(userId, payload);
 
       addToast("success", "Cập nhật thành công!");
-      navigate("/");
+      
+      // Determine redirect path based on user role
+      const updatedUser = await authService.getCurrentUser();
+      const userRole = updatedUser?.roleId;
 
+      if (userRole === roles.ADMIN || userRole === roles.COMPANY_ADMIN) {
+        navigate("/admin/dashboard");
+      } else if (userRole === roles.HR) {
+        navigate("/hr/dashboard");
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       addToast("error", err?.response?.data?.message || "Có lỗi xảy ra");
     } finally {
@@ -254,7 +212,6 @@ const AdditionalInformation = () => {
 
   return (
     <div className="h-screen overflow-hidden relative flex items-center justify-center bg-gradient-to-br from-[#F9F9F4] via-[#F0EDE5] to-[#E7E4DC] px-4 py-8">
-
       <div className="pointer-events-none absolute w-96 h-96 bg-[#C7A59D]/30 rounded-full blur-3xl top-[-100px] left-[-100px]" />
 
       <div className="pointer-events-none absolute w-96 h-96 bg-[#27592D]/20 rounded-full blur-3xl bottom-[-120px] right-[-80px]" />
@@ -270,14 +227,21 @@ const AdditionalInformation = () => {
             onClick={onAvatarClick}
           >
             {avatarPreview ? (
-              <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
+              <img
+                src={avatarPreview}
+                alt="Avatar"
+                className="w-full h-full object-cover"
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-[#27592D]">
                 Avatar
               </div>
             )}
 
-            <button className="absolute bottom-2 right-2 p-2 bg-white/90 rounded-full shadow" type="button">
+            <button
+              className="absolute bottom-2 right-2 p-2 bg-white/90 rounded-full shadow"
+              type="button"
+            >
               <Camera className="w-5 h-5 text-[#27592D]" />
             </button>
 
@@ -296,28 +260,12 @@ const AdditionalInformation = () => {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 relative z-30">
-          <div className="relative z-40">
-            <SelectField
-              name="city"
-              label="Tỉnh/Thành phố"
-              value={form.city}
-              onChange={handleCityChange}
-              options={provinces}
-              placeholder="Chọn tỉnh/thành phố"
-              error={errors.city}
-            />
-          </div>
-
-          <div className="relative z-40">
-            <SelectField
-              name="ward"
-              label="Phường/Xã"
-              value={form.ward}
-              onChange={updateField}
-              options={communes}
-              placeholder="Chọn phường/xã"
-              error={errors.ward}
-              disabled={communes.length === 0}
+          <div className="col-span-full relative z-40">
+            <AddressSelect
+              value={{ provinceCode: form.city, communeCode: form.ward }}
+              onChange={handleAddressChange}
+              errors={errors}
+              labels={{ province: "Tỉnh/Thành phố", ward: "Phường/Xã" }}
             />
           </div>
 
@@ -360,22 +308,32 @@ const AdditionalInformation = () => {
               value={form.gender ?? ""}
               onChange={updateField}
               options={[
-                { value: false, label: "Nam" },
-                { value: true, label: "Nữ" },
+                { label: "Nam", value: "MALE" },
+                { label: "Nữ", value: "FEMALE" },
+                { label: "Khác", value: "OTHER" },
+                { label: "Không muốn tiết lộ", value: "PREFER_NOT_TO_SAY" },
               ]}
               placeholder="Chọn giới tính"
               error={errors.gender}
             />
           </div>
         </div>
-
       </div>
 
       <div className="fixed bottom-4 left-4 right-4 z-[100] flex justify-between gap-3 md:left-6 md:right-6 md:bottom-6 pointer-events-none">
-        <BrandButton fullWidth={false} className="px-5 py-2 md:px-6 pointer-events-auto" onClick={() => navigate("/")}>
+        <BrandButton
+          fullWidth={false}
+          className="px-5 py-2 md:px-6 pointer-events-auto"
+          onClick={() => navigate("/")}
+        >
           Quay lại
         </BrandButton>
-        <BrandButton fullWidth={false} className="px-5 py-2 md:px-6 pointer-events-auto" disabled={loading || !userId} onClick={onSubmit}>
+        <BrandButton
+          fullWidth={false}
+          className="px-5 py-2 md:px-6 pointer-events-auto"
+          disabled={loading || !userId}
+          onClick={onSubmit}
+        >
           {loading ? "Đang lưu..." : "Lưu và tiếp tục"}
         </BrandButton>
       </div>

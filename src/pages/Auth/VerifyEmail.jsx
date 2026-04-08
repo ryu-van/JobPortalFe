@@ -89,18 +89,21 @@ const VerifyEmail = () => {
     const companyId = user.companyId ?? user.companyID ?? user.company_id ?? user.CompanyId ?? null;
     const hasCompany = !!companyId;
 
-    if (roleId === roles.CANDIDATE) {
-      if (!hasPhone) return "/additional-information";
-      return "/";
+    if (!hasPhone) return "/additional-information";
+
+    if (roleId === roles.ADMIN) {
+      return "/admin/dashboard";
+    }
+
+    if (roleId === roles.COMPANY_ADMIN) {
+      return "/company-admin/dashboard";
     }
 
     if (roleId === roles.HR) {
-      if (!hasCompany) return "/hr/create-company";
-      if (!hasPhone) return "/additional-information";
-      return "/";
+      if (!hasCompany) return "/create-company";
+      return "/hr/dashboard";
     }
 
-    if (!hasPhone) return "/additional-information";
     return "/";
   };
 

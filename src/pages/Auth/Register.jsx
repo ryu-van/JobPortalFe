@@ -40,7 +40,7 @@ const Register = () => {
       }
 
       const res = await authService.register(registerData);
-      dispatch(loginSuccess({ user: res.user }));
+      dispatch(loginSuccess({ user: res.user, token: res.accessToken }));
 
       const route = authService.determinePostLoginRoute(res);
       navigate(route.path, { state: route.state });

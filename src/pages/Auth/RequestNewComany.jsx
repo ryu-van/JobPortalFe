@@ -4,7 +4,6 @@ import InputField from "../../components/form/InputField";
 import SelectField from "../../components/form/SelectField";
 import BrandButton from "../../components/form/BrandButton";
 import companyService from "../../services/companyService";
-import addressService from "../../services/addressService";
 import { useToast } from "../../components/commons/ToastContext";
 import Header from "../../components/commons/Header";
 import AddressSelect from "../../components/commons/AddressSelect";
@@ -19,35 +18,37 @@ const RequestNewCompany = () => {
     phone: "",
   });
 
-  const [provinces, setProvinces] = useState([]);
-  const [communes, setCommunes] = useState([]);
-
   const [company, setCompany] = useState({
     companyName: "",
-    businessLicense: "",
     taxCode: "",
     street: "",
-    ward: "",
     city: "",
+    provinceName: "",
+    ward: "",
+    communeName: "",
+    industryId: "",
     requestedRole: "hr",
   });
   const [docFiles, setDocFiles] = useState([]);
+  const [industries, setIndustries] = useState([]);
 
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    (async () => {
-
-      const p = await addressService.getProvinces();
-      if (p.success) {
-        const mapped = p.data.map((x) => ({
-          value: x.code || x.province_code,
-          label: x.name || x.province_name,
+    const fetchIndustries = async () => {
+      try {
+        const res = await companyService.getAllIndustries();
+        const items = Array.isArray(res) ? res : res?.data || [];
+        const options = items.map((item) => ({
+          value: String(item.id),
+          label: item.name,
         }));
-        setProvinces(mapped);
+        setIndustries(options);
+      } catch (err) {
+        console.error("Error fetching industries:", err);
       }
-
-    })();
+    };
+    fetchIndustries();
   }, []);
 
   const updateCompany = (e) => {
@@ -66,34 +67,15 @@ const RequestNewCompany = () => {
     setErrors((prev) => ({ ...prev, [map[name]]: "" }));
   };
 
-  const handleCityChange = async (e) => {
-    const provinceCode = e.target.value;
+  const handleAddressChange = (val) => {
     setCompany((prev) => ({
       ...prev,
-      city: provinceCode,
-      ward: "",
+      city: val.provinceCode,
+      provinceName: val.provinceName,
+      ward: val.communeCode,
+      communeName: val.communeName,
     }));
-
-    if (!provinceCode) {
-      setCommunes([]);
-      return;
-    }
-
-    try {
-      const res = await addressService.getCommunesByProvince(provinceCode);
-      if (res.success) {
-        const mappedCommunes = res.data.map((w) => ({
-          value: w.code || w.ward_code,
-          label: w.name || w.ward_name,
-        }));
-        setCommunes(mappedCommunes);
-      } else {
-        setCommunes([]);
-      }
-    } catch (error) {
-      console.error("Error loading wards:", error);
-      setCommunes([]);
-    }
+    setErrors((prev) => ({ ...prev, city: "", ward: "" }));
   };
 
   const validate = () => {
@@ -136,17 +118,12 @@ const RequestNewCompany = () => {
     setSubmitting(true);
 
     try {
-      const selectedProvince =
-        provinces.find((p) => String(p.value) === String(company.city)) || null;
-      const selectedWard =
-        communes.find((w) => String(w.value) === String(company.ward)) || null;
-
       const address = {
         addressType: "HEADQUARTERS",
-        provinceCode: selectedProvince?.value || company.city || "",
-        provinceName: selectedProvince?.label || "",
-        communeCode: selectedWard?.value || company.ward || "",
-        communeName: selectedWard?.label || "",
+        provinceCode: company.city || "",
+        provinceName: company.provinceName || "",
+        communeCode: company.ward || "",
+        communeName: company.communeName || "",
         detailAddress: company.street || "",
         isPrimary: true,
       };
@@ -156,7 +133,6 @@ const RequestNewCompany = () => {
         contactEmail: contact.email,
         contactPhone: contact.phone,
         companyName: company.companyName,
-        businessLicense: company.businessLicense,
         taxCode: company.taxCode,
         requestedRole: company.requestedRole,
         addressRequest: address
@@ -224,43 +200,27 @@ const RequestNewCompany = () => {
               />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <InputField
-                  label="Mã giấy phép kinh doanh"
-                  name="businessLicense"
-                  value={company.businessLicense}
-                  onChange={updateCompany}
-                />
-
-                <InputField
                   label="Mã số thuế"
                   name="taxCode"
                   value={company.taxCode}
                   onChange={updateCompany}
                   error={errors.taxCode}
                 />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <SelectField
-                  name="city"
-                  label="Tỉnh/Thành phố"
-                  value={company.city}
-                  onChange={handleCityChange}
-                  options={provinces}
-                  placeholder="Chọn tỉnh/thành phố"
-                  error={errors.city}
-                />
-
-                <SelectField
-                  name="ward"
-                  label="Phường/Xã"
-                  value={company.ward}
+                  label="Ngành nghề"
+                  name="industryId"
+                  options={industries}
+                  value={company.industryId}
                   onChange={updateCompany}
-                  options={communes}
-                  placeholder="Chọn phường/xã"
-                  error={errors.ward}
-                  disabled={communes.length === 0}
+                  error={errors.industryId}
                 />
               </div>
+
+              <AddressSelect
+                value={{ provinceCode: company.city, communeCode: company.ward }}
+                onChange={handleAddressChange}
+                errors={errors}
+              />
 
               <InputField
                 label="Địa chỉ"
