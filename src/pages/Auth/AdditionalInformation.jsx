@@ -6,12 +6,15 @@ import { useToast } from "../../components/commons/ToastContext";
 import authService from "../../services/authService";
 import userService from "../../services/userService";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "../../store/userSlice";
 import { Camera, MapPin, User, Info, Pencil, Plus, Image as ImageIcon } from "lucide-react";
 import { roles } from "../../constants/roles";
 import AddressSelect from "../../components/commons/AddressSelect";
 const AdditionalInformation = () => {
   const { addToast } = useToast();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState(null);
@@ -39,6 +42,12 @@ const AdditionalInformation = () => {
 
     (async () => {
       try {
+        // Check token before calling getCurrentUser to avoid 403 error
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (!token) {
+          return;
+        }
+        
         const u = await authService.getCurrentUser();
         console.log("AdditionalInformation getCurrentUser:", u);
 
@@ -115,6 +124,13 @@ const AdditionalInformation = () => {
     if (!file.type.startsWith("image/")) {
       setAvatarError("Vui lòng chọn ảnh hợp lệ");
       setAvatarPreview("");
+      setAvatarFile(null);
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setAvatarError("Ảnh đại diện không được vượt quá 5MB");
+      setAvatarPreview("");
+      setAvatarFile(null);
       return;
     }
     setAvatarPreview(URL.createObjectURL(file));
@@ -125,8 +141,8 @@ const AdditionalInformation = () => {
   const validate = () => {
     const next = {};
     if (!form.phoneNumber) next.phoneNumber = "Vui lòng nhập số điện thoại";
-    if (form.phoneNumber && !/^\+?[0-9]{9,15}$/.test(form.phoneNumber))
-      next.phoneNumber = "Số điện thoại không hợp lệ";
+    else if (!/^(0|\+84)[3-9][0-9]{8}$/.test(form.phoneNumber.replace(/\s/g, "")))
+      next.phoneNumber = "Số điện thoại không hợp lệ (ví dụ: 0912345678)";
 
     if (!form.gender) next.gender = "Vui lòng chọn giới tính";
 
@@ -138,8 +154,8 @@ const AdditionalInformation = () => {
     } else {
       const dob = new Date(form.dateOfBirth);
       const now = new Date();
-      if (isNaN(dob.getTime()) || dob > now) {
-        next.dateOfBirth = "Ngày sinh không hợp lệ";
+      if (isNaN(dob.getTime()) || dob >= now) {
+        next.dateOfBirth = "Ngày sinh phải là ngày trong quá khứ";
       } else {
         const age = Math.floor((now - dob) / (365.25 * 24 * 60 * 60 * 1000));
         if (age < 15 || age > 100) {
@@ -192,14 +208,23 @@ const AdditionalInformation = () => {
 
       addToast("success", "Cập nhật thành công!");
       
-      // Determine redirect path based on user role
+      // Fetch updated user and sync Redux store BEFORE navigating,
+      // so ProtectedRoute sees the new phoneNumber and doesn't redirect back.
       const updatedUser = await authService.getCurrentUser();
+      dispatch(loginSuccess({ user: updatedUser }));
+
       const userRole = updatedUser?.roleId;
 
-      if (userRole === roles.ADMIN || userRole === roles.COMPANY_ADMIN) {
+      if (userRole === roles.ADMIN) {
         navigate("/admin/dashboard");
+      } else if (userRole === roles.COMPANY_ADMIN) {
+        navigate("/create-company");
       } else if (userRole === roles.HR) {
-        navigate("/hr/dashboard");
+        if (updatedUser?.companyId) {
+          navigate("/hr/dashboard");
+        } else {
+          navigate("/create-company");
+        }
       } else {
         navigate("/");
       }
@@ -211,19 +236,19 @@ const AdditionalInformation = () => {
   };
 
   return (
-    <div className="h-screen overflow-hidden relative flex items-center justify-center bg-gradient-to-br from-[#F9F9F4] via-[#F0EDE5] to-[#E7E4DC] px-4 py-8">
-      <div className="pointer-events-none absolute w-96 h-96 bg-[#C7A59D]/30 rounded-full blur-3xl top-[-100px] left-[-100px]" />
+    <div className="h-screen overflow-hidden relative flex items-center justify-center bg-white px-4 py-8">
+      <div className="pointer-events-none absolute w-96 h-96 bg-brand/10 rounded-full blur-3xl top-[-100px] left-[-100px]" />
 
-      <div className="pointer-events-none absolute w-96 h-96 bg-[#27592D]/20 rounded-full blur-3xl bottom-[-120px] right-[-80px]" />
+      <div className="pointer-events-none absolute w-96 h-96 bg-brand/5 rounded-full blur-3xl bottom-[-120px] right-[-80px]" />
 
-      <div className="w-full max-w-lg md:max-w-4xl lg:max-w-5xl bg-white/70 backdrop-blur-lg shadow-2xl rounded-3xl p-8 md:p-10 border border-white/30 relative z-20 pb-24">
-        <h1 className="text-3xl text-center font-semibold text-[#27592D] mb-2">
+      <div className="w-full max-w-lg md:max-w-4xl lg:max-w-5xl bg-white shadow-2xl rounded-3xl p-8 md:p-10 border border-gray-100 relative z-20 pb-24">
+        <h1 className="text-3xl text-center font-semibold text-brand mb-2">
           Thông tin bổ sung
         </h1>
 
         <div className="flex justify-center mb-6 relative z-30">
           <div
-            className="relative w-28 h-28 md:w-40 md:h-40 rounded-full bg-[#E7E4DC] overflow-hidden cursor-pointer"
+            className="relative w-28 h-28 md:w-40 md:h-40 rounded-full bg-gray-50 overflow-hidden cursor-pointer"
             onClick={onAvatarClick}
           >
             {avatarPreview ? (
@@ -233,7 +258,7 @@ const AdditionalInformation = () => {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-[#27592D]">
+              <div className="w-full h-full flex items-center justify-center text-brand">
                 Avatar
               </div>
             )}
@@ -242,7 +267,7 @@ const AdditionalInformation = () => {
               className="absolute bottom-2 right-2 p-2 bg-white/90 rounded-full shadow"
               type="button"
             >
-              <Camera className="w-5 h-5 text-[#27592D]" />
+              <Camera className="w-5 h-5 text-brand" />
             </button>
 
             <input

@@ -335,7 +335,7 @@ const Users = () => {
           type="button"
           onClick={() => handleAddUser()}
           fullWidth={false}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white bg-[#27592D] hover:bg-[#1f4022] transition shadow"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white bg-[#15803d] hover:bg-[#14532d] transition shadow"
         >
           <span>
             <CirclePlus className="w-5 h-5" />
@@ -394,7 +394,7 @@ const Users = () => {
         {loading ? (
           <div className="flex items-center justify-center min-h-[240px]">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#27592D] mx-auto"></div>
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#15803d] mx-auto"></div>
               <p className="mt-3 text-gray-600">
                 Đang tải danh sách người dùng...
               </p>

@@ -20,9 +20,9 @@ export default function SelectField({
   const sizeCls = size === "sm" ? "py-2 rounded-lg text-sm" : "py-3 rounded-xl text-sm";
 
   return (
-    <div className="flex flex-col gap-1 w-full">
+    <div className="flex flex-col gap-1.5 w-full">
       {label && (
-        <label className="text-sm font-medium text-gray-700">
+        <label className="text-[10px] font-bold uppercase tracking-widest text-brand/40 ml-4">
           {label}
         </label>
       )}
@@ -33,10 +33,9 @@ export default function SelectField({
           value={value}
           onChange={onChange}
           disabled={disabled}
-          className={`w-full appearance-none px-5 ${sizeCls} border bg-white/70 text-gray-700 focus:ring-2 outline-none transition duration-200 cursor-pointer
-            focus:ring-[${themeColor}] focus:border-[${borderColor}] ${error ? "border-red-500" : "border-[#C7A59D]/40"} ${className}`}
+          className={`vw-input appearance-none !px-5 ${error ? "!border-red-500" : ""} ${className}`}
         >
-          <option value="" disabled className="text-gray-400">
+          <option value="" disabled className="text-brand/40">
             {placeholder}
           </option>
 
@@ -44,9 +43,8 @@ export default function SelectField({
             <option
               key={opt.value}
               value={opt.value}
-              className={`bg-[#F9F9F4] hover:bg-[#E7E4DC] text-[${themeColor}]`}
+              className="bg-white text-brand"
             >
-              {opt.icon && <span className="mr-2">{opt.icon}</span>}
               {opt.label}
             </option>
           ))}
@@ -54,7 +52,7 @@ export default function SelectField({
 
         {/* Icon mũi tên xuống */}
         <svg
-          className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#5A7B4B] pointer-events-none"
+          className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-brand/40 pointer-events-none"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -67,7 +65,7 @@ export default function SelectField({
           />
         </svg>
       </div>
-      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+      {error && <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest mt-1 ml-4">{error}</p>}
     </div>
   );
 }

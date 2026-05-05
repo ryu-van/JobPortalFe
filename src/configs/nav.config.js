@@ -6,8 +6,8 @@ import {
   UserRoundSearch,
   Cog,
   LayoutDashboard,
-  BarChart3,
-  ChartBarStacked
+  ChartBarStacked,
+  Mail,
 } from "lucide-react";
 
 export const NAV_ITEMS = [
@@ -31,7 +31,6 @@ export const NAV_ITEMS = [
     icon: LayoutDashboard,
   },
 
-
   // ===== HR =====
   {
     label: "Jobs",
@@ -40,38 +39,44 @@ export const NAV_ITEMS = [
     icon: BriefcaseBusiness,
   },
   {
-    label: "Jobs", // Fallback for Company Admin if they have this feature
-    path: "/jobs",
+    label: "Candidates",
+    path: "/hr/candidates",
+    roles: [roles.HR],
+    icon: UserRoundSearch,
+  },
+
+  // ===== COMPANY ADMIN =====
+  {
+    label: "Jobs",
+    path: "/company-admin/jobs",
     roles: [roles.COMPANY_ADMIN],
     icon: BriefcaseBusiness,
   },
   {
     label: "Candidates",
-    path: "/candidates",
-    roles: [roles.HR, roles.COMPANY_ADMIN],
+    path: "/company-admin/candidates",
+    roles: [roles.COMPANY_ADMIN],
     icon: UserRoundSearch,
   },
-
-  // ===== ADMIN COMPANY =====
   {
     label: "Company Profile",
-    path: "/company-profile",
+    path: "/company-admin/company-profile",
     roles: [roles.COMPANY_ADMIN],
     icon: Building2,
   },
   {
-    label: "Team Management",
-    path: "/team-management",
+    label: "Team",
+    path: "/company-admin/team",
     roles: [roles.COMPANY_ADMIN],
     icon: Users,
   },
   {
-    label: "Analytics",
-    path: "/analytics",
+    label: "Invitations",
+    path: "/company-admin/invitations",
     roles: [roles.COMPANY_ADMIN],
-    icon: BarChart3,
+    icon: Mail,
   },
-  
+
   // ===== ADMIN =====
   {
     label: "Categories & Industries",
@@ -97,7 +102,7 @@ export const NAV_ITEMS = [
     roles: [roles.ADMIN],
     icon: BriefcaseBusiness,
   },
-   {
+  {
     label: "Systems",
     path: "/systems",
     roles: [roles.HR, roles.COMPANY_ADMIN, roles.ADMIN],

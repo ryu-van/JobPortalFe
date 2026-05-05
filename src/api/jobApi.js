@@ -42,16 +42,14 @@ const jobApi = {
   },
 
   // Saved jobs
-  addJobToSavedJobs(jobId, userId) {
-    return axiosClient.post(`/jobs/${jobId}/saved-jobs`, null, {
-      params: { userId },
-    });
+  addJobToSavedJobs(jobId) {
+    return axiosClient.post(`/jobs/${jobId}/saved-jobs`, null);
   },
   removeJobFromSavedJobs(savedJobId) {
     return axiosClient.delete(`/jobs/saved-jobs/${savedJobId}`);
   },
-  getSavedJobs(userId) {
-    return axiosClient.get(`/jobs/saved-jobs`, { params: { userId } });
+  getSavedJobs() {
+    return axiosClient.get(`/jobs/saved-jobs`);
   },
 
   // Skills

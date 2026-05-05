@@ -13,11 +13,206 @@ html, body {
   /* overflow: hidden; Removed to allow scrolling */
 }
 :root {
-  --brand: #27592D;
-  --brand-bg: rgba(39, 89, 45, 0.08);
+  --brand: #15803d;
+  --brand-dark: #33d473;
+  --brand-light: #22c55e;
+  --brand-bg: rgba(23, 223, 96, 0.04);
+  --brand-bg-strong: rgba(32, 211, 98, 0.918);
+  --sec: #15803d;
+  --sec-dark: #14532d;
+  --bg: #FFFFFF;
+  --bg2: #F9FAFB;
+  --bg3: #FFFFFF;
+  --bg4: #F3F4F6;
+  --bg5: #E5E7EB;
+  --text: #1a1a1a;
+  --text-head: #1F2D1F;
+  --text-muted: #7a7a6a;
   --gray-700: #374151;
   --gray-500: #6B7280;
   --gray-100: #F3F4F6;
+  --amber: #C7A59D;
+  --red: #AA423A;
+  --red-bg: rgba(170, 66, 58, 0.05);
+  --card-shadow: 0 4px 20px rgba(21, 128, 61, 0.06);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  .vw-card {
+    @apply rounded-xl transition-all duration-300;
+    background-color: #fff;
+    border: 1px solid var(--bg5);
+  }
+
+  .vw-card-hover {
+    border-color: var(--bg5);
+  }
+
+  .vw-card-hover:hover {
+    border-color: var(--brand-light);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  }
+
+  .vw-section-label {
+    @apply text-[10px] font-bold mb-2 block;
+    color: var(--brand);
+    opacity: 0.8;
+  }
+
+  .vw-heading {
+    color: var(--text-head);
+    letter-spacing: -0.03em;
+    @apply font-bold leading-tight;
+  }
+
+  .vw-btn,
+  .vw-btn-primary,
+  .vw-btn-secondary,
+  .vw-btn-ghost,
+  .vw-btn-danger {
+    @apply inline-flex items-center justify-center gap-2 text-xs font-bold transition-all duration-200;
+    min-height: 44px;
+    border-radius: 9999px;
+  }
+
+  .vw-btn-primary { 
+    background: var(--brand);
+    color: #fff;
+  }
+
+  .vw-btn-primary:hover {
+    background: var(--brand-dark);
+    transform: translateY(-1px);
+  }
+
+  .vw-btn-secondary {
+    background: transparent;
+    color: var(--brand);
+    border: 1.5px solid var(--brand);
+  }
+
+  .vw-btn-secondary:hover {
+    background: var(--brand-bg);
+  }
+
+  .vw-btn-ghost {
+    @apply text-gray-700;
+    background: transparent;
+    border: 1px solid transparent;
+  }
+
+  .vw-btn-ghost:hover {
+    background: var(--bg4);
+  }
+
+  .vw-btn-danger {
+    color: var(--red);
+    border: 1px solid rgba(170, 66, 58, 0.1);
+    background: var(--red-bg);
+  }
+
+  .vw-input {
+    @apply w-full bg-white px-5 text-sm outline-none transition-all duration-200;
+    min-height: 52px;
+    color: var(--text);
+    border: 1px solid var(--bg5);
+    border-radius: 9999px; 
+  }
+
+  .vw-input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.6;
+  }
+
+  .vw-input:focus {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 1px var(--brand);
+  }
+
+  .vw-filter-panel {
+    background: #fff;
+    border: 1px solid var(--bg5);
+    border-radius: 6px;
+  }
+
+  .vw-tab-shell {
+    @apply rounded-lg p-1;
+    background: var(--bg4);
+    border: 1px solid var(--bg5);
+  }
+
+  .vw-tab-active {
+    @apply font-semibold;
+    background: #fff;
+    color: var(--brand);
+    border: 1px solid var(--bg5);
+    border-radius: 6px;
+  }
+
+  .vw-tab-inactive {
+    color: var(--gray-500);
+    border-radius: 6px;
+  }
+
+  .vw-tab-inactive:hover {
+    background: rgba(255,255,255,0.5);
+    color: var(--text);
+  }
+
+  .vw-badge {
+    @apply inline-flex items-center rounded-full px-3 py-1 text-[10px] font-bold;
+  }
+
+  .vw-badge-active {
+    background: #eef2ef;
+    color: var(--brand);
+  }
+
+  .vw-badge-success {
+    background: var(--brand-bg);
+    color: var(--brand);
+  }
+
+  .vw-badge-warning {
+    background: #fffbeb;
+    color: #d97706;
+  }
+
+  .vw-badge-danger {
+    background: #fef2f2;
+    color: var(--red);
+  }
+
+  .vw-badge-tag {
+    @apply text-gray-600;
+    background: var(--bg4);
+  }
+
+  .vw-callout-brand {
+    @apply rounded-lg border p-4;
+    background: var(--brand-bg-strong);
+    border-color: rgba(23, 223, 96, 0.89);
+  }
+
+  .vw-callout-warning {
+    @apply rounded-lg border p-4;
+    background: #fffbeb;
+    color: #b45309;
+    border-color: rgba(245, 158, 11, 0.2);
+  }
+
+  .vw-callout-error {
+    @apply rounded-lg border p-4;
+    color: var(--red);
+    background: rgba(170, 66, 58, 0.08);
+    border-color: rgba(170, 66, 58, 0.2);
+  }
 }
 
 .menu-item {
@@ -91,11 +286,10 @@ html, body {
   padding: 0.125rem 0.625rem;
   font-size: 0.75rem;
   font-weight: 600;
-  text-transform: uppercase;
   color: var(--brand);
 }
 .menu-dropdown-badge-active {
-  background-color: rgba(39, 89, 45, 0.2);
+  background-color: rgba(21, 128, 61, 0.2);
 }
 .menu-dropdown-badge-inactive {
   background-color: var(--brand-bg);

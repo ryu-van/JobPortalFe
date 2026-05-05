@@ -2,7 +2,7 @@ import { Briefcase, Building2, HeartHandshake } from "lucide-react";
 
 export default function Header() {
   return (
-    <header className="w-full bg-[#27592D] text-white">
+    <header className="w-full bg-[#000000] text-white">
       <div className="flex items-center justify-between px-4 sm:px-10 py-3">
         <div className="flex items-center gap-2">
           <HeartHandshake className="w-6 h-6" />

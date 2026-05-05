@@ -9,25 +9,21 @@ import { format } from "date-fns";
 
 const normalizeResult = (res) => {
   if (!res) return { items: [], pageInfo: null };
-  // Nếu res chính là mảng (trường hợp hiếm nhưng có thể xảy ra)
   if (Array.isArray(res)) {
     return { items: res, pageInfo: null };
   }
-  // Trường hợp res.data là mảng (như Bruno cho thấy)
   if (res.data && Array.isArray(res.data)) {
     return {
       items: res.data,
       pageInfo: res.pagination || res.pageInfo || null,
     };
   }
-  // Trường hợp res.data.data là mảng (cấu trúc lồng)
   if (res.data && res.data.data && Array.isArray(res.data.data)) {
     return {
       items: res.data.data,
       pageInfo: res.data.pagination || res.data.pageInfo || null,
     };
   }
-  // Trường hợp items nằm trực tiếp ở root của res
   const rootItems = res.items || res.content || res.list || res.data;
   if (Array.isArray(rootItems)) {
     return { 
@@ -161,7 +157,7 @@ const PendingRequests = ({ addToast }) => {
           <select 
             value={verifyStatus}
             onChange={(e) => { setVerifyStatus(e.target.value); setPage(0); }}
-            className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#27592D]/20 outline-none transition-all cursor-pointer font-medium"
+            className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#000000]/20 outline-none transition-all cursor-pointer font-medium"
           >
             <option value="PENDING">Đang chờ duyệt</option>
             <option value="APPROVED">Đã phê duyệt</option>
@@ -188,8 +184,8 @@ const PendingRequests = ({ addToast }) => {
                   <tr key={req.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-[#27592D]/10 rounded-lg flex items-center justify-center">
-                          <Building2 className="w-5 h-5 text-[#27592D]" />
+                        <div className="w-10 h-10 bg-[#000000]/10 rounded-lg flex items-center justify-center">
+                          <Building2 className="w-5 h-5 text-[#000000]" />
                         </div>
                         <div>
                           <p className="font-bold text-gray-900">{req.companyName}</p>
@@ -367,7 +363,7 @@ const Companies = () => {
         {activeTab === 'list' && (
           <button
             onClick={() => navigate("/admin/companies/new")}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#27592D] text-white rounded-xl text-sm font-semibold shadow-md hover:bg-[#1e4623] transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#000000] text-white rounded-xl text-sm font-semibold shadow-md hover:bg-[#1e4623] transition-colors"
           >
             <Plus className="w-4 h-4" />
             <span>Thêm công ty mới</span>
@@ -378,17 +374,17 @@ const Companies = () => {
       <div className="flex gap-2 border-b border-gray-200">
         <button 
           onClick={() => { setActiveTab('list'); setPage(0); }} 
-          className={`px-4 py-2.5 text-sm font-semibold transition-all relative ${activeTab === 'list' ? 'text-[#27592D]' : 'text-gray-500 hover:text-gray-800'}`}
+          className={`px-4 py-2.5 text-sm font-semibold transition-all relative ${activeTab === 'list' ? 'text-[#000000]' : 'text-gray-500 hover:text-gray-800'}`}
         >
           Danh sách công ty
-          {activeTab === 'list' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#27592D] rounded-full" />}
+          {activeTab === 'list' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#000000] rounded-full" />}
         </button>
         <button 
           onClick={() => { setActiveTab('requests'); setPage(0); }} 
-          className={`px-4 py-2.5 text-sm font-semibold transition-all relative ${activeTab === 'requests' ? 'text-[#27592D]' : 'text-gray-500 hover:text-gray-800'}`}
+          className={`px-4 py-2.5 text-sm font-semibold transition-all relative ${activeTab === 'requests' ? 'text-[#000000]' : 'text-gray-500 hover:text-gray-800'}`}
         >
           Yêu cầu chờ duyệt
-          {activeTab === 'requests' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#27592D] rounded-full" />}
+          {activeTab === 'requests' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#000000] rounded-full" />}
         </button>
       </div>
 
@@ -402,7 +398,7 @@ const Companies = () => {
                 placeholder="Tìm kiếm theo tên, email, MST..." 
                 value={searchTerm} 
                 onChange={handleSearchChange} 
-                className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#27592D]/20 focus:border-[#27592D] outline-none transition-all"
+                className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#000000]/20 focus:border-[#000000] outline-none transition-all"
               />
             </div>
             
@@ -411,7 +407,7 @@ const Companies = () => {
               <select 
                 value={isActiveFilter}
                 onChange={(e) => { setIsActiveFilter(e.target.value); setPage(0); }}
-                className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#27592D]/20 outline-none transition-all cursor-pointer font-medium min-w-[140px]"
+                className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#000000]/20 outline-none transition-all cursor-pointer font-medium min-w-[140px]"
               >
                 <option value="all">Tất cả</option>
                 <option value="true">Đang hoạt động</option>

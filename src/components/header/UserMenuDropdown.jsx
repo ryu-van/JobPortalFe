@@ -1,9 +1,15 @@
 import React, { useState, useRef, useEffect, useImperativeHandle, forwardRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { User, UserCircle, Settings, LogOut } from "lucide-react";
+import { logout } from "../../store/userSlice";
+import authService from "../../services/authService";
 
 const UserMenuDropdown = forwardRef(({ user, onCloseOther }, ref) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useImperativeHandle(ref, () => ({
     close: () => setIsOpen(false)
@@ -35,6 +41,23 @@ const UserMenuDropdown = forwardRef(({ user, onCloseOther }, ref) => {
     setIsOpen(!isOpen);
     if (!isOpen) {
       onCloseOther?.();
+    }
+  };
+
+  const handleMyProfile = () => {
+    setIsOpen(false);
+    navigate("/profile");
+  };
+
+  const handleLogout = async () => {
+    setIsOpen(false);
+    try {
+      await authService.logout();
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      dispatch(logout());
+      navigate("/login");
     }
   };
 
@@ -73,7 +96,7 @@ const UserMenuDropdown = forwardRef(({ user, onCloseOther }, ref) => {
                   className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
                 />
               ) : (
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#27592D] to-[#1f4a24] flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#000000] to-[#1f4a24] flex items-center justify-center">
                   <UserCircle className="w-6 h-6 text-white" />
                 </div>
               )}
@@ -84,16 +107,22 @@ const UserMenuDropdown = forwardRef(({ user, onCloseOther }, ref) => {
             </div>
           </div>
           <div className="p-2">
-            <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 transition-colors text-left group">
-              <UserCircle className="w-4 h-4 text-gray-500 group-hover:text-[#27592D]" />
-              <span className="text-sm text-gray-700 group-hover:text-[#27592D]">My Profile</span>
+            <button 
+              onClick={handleMyProfile}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 transition-colors text-left group"
+            >
+              <UserCircle className="w-4 h-4 text-gray-500 group-hover:text-[#000000]" />
+              <span className="text-sm text-gray-700 group-hover:text-[#000000]">My Profile</span>
             </button>
             <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 transition-colors text-left group">
-              <Settings className="w-4 h-4 text-gray-500 group-hover:text-[#27592D]" />
-              <span className="text-sm text-gray-700 group-hover:text-[#27592D]">Settings</span>
+              <Settings className="w-4 h-4 text-gray-500 group-hover:text-[#000000]" />
+              <span className="text-sm text-gray-700 group-hover:text-[#000000]">Settings</span>
             </button>
             <div className="my-1 border-t border-gray-200"></div>
-            <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-red-50 transition-colors text-left group">
+            <button 
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-red-50 transition-colors text-left group"
+            >
               <LogOut className="w-4 h-4 text-gray-500 group-hover:text-red-600" />
               <span className="text-sm text-gray-700 group-hover:text-red-600">Logout</span>
             </button>

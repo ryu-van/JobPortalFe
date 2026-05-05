@@ -30,7 +30,6 @@ const DocumentPreviewModal = ({ isOpen, onClose, file }) => {
           </button>
         </div>
 
-        {/* Modal Body */}
         <div className="flex-1 bg-gray-50 overflow-hidden flex flex-col items-center justify-center relative">
           {isPDF ? (
             <iframe
@@ -53,7 +52,7 @@ const DocumentPreviewModal = ({ isOpen, onClose, file }) => {
               <a 
                 href={file.url} 
                 download={file.name}
-                className="inline-flex items-center gap-3 px-8 py-4 bg-[#27592D] text-white rounded-2xl font-bold shadow-lg shadow-[#27592D]/20 hover:bg-[#1f4523] transition-all hover:-translate-y-1"
+                className="inline-flex items-center gap-3 px-8 py-4 bg-[#000000] text-white rounded-2xl font-bold shadow-lg shadow-[#000000]/20 hover:bg-[#1f4523] transition-all hover:-translate-y-1"
               >
                 <Plus className="w-5 h-5 rotate-45" />
                 Tải xuống tài liệu

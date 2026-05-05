@@ -41,6 +41,12 @@ const VerifyEmail = () => {
     }
     (async () => {
       try {
+        // Check token before calling getCurrentUser to avoid 403 error
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (!token) {
+          return;
+        }
+        
         const u = await authService.getCurrentUser();
         const em = u?.email || u?.u?.email || "";
         if (em) setEmailState(em);
@@ -122,6 +128,7 @@ const VerifyEmail = () => {
         updatedUser = currentUser;
       }
       if (updatedUser && token) {
+        localStorage.setItem('token', token);
         dispatch(loginSuccess({ user: updatedUser, token }));
       }
       const next = resolveNextRoute(updatedUser || currentUser);
@@ -143,8 +150,12 @@ const VerifyEmail = () => {
       }
       if (!targetEmail) {
         try {
-          const u = await authService.getCurrentUser();
-          targetEmail = u?.email || u?.u?.email || "";
+          // Check token before calling getCurrentUser to avoid 403 error
+          const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+          if (token) {
+            const u = await authService.getCurrentUser();
+            targetEmail = u?.email || u?.u?.email || "";
+          }
         } catch {
           // Silently ignore getCurrentUser failure
         }
@@ -161,51 +172,54 @@ const VerifyEmail = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#F9F9F4] via-[#F0EDE5] to-[#E7E4DC] relative overflow-hidden font-sans">
-      <header className="w-full bg-[#27592D] text-white">
+    <div className="min-h-screen flex flex-col bg-white relative overflow-hidden font-sans">
+      <header className="w-full bg-[#15803d] border-b border-[#15803d]">
         <div className="flex items-center justify-between px-4 sm:px-10 py-3">
           <div className="flex items-center gap-2">
-            <HeartHandshake className="w-6 h-6" />
+            <HeartHandshake className="w-6 h-6 text-white" />
             <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Ryu Career</h2>
           </div>
           <div className="flex items-center gap-4 sm:gap-8">
-            <a href="#" className="text-white/80 hover:text-white flex items-center gap-1 text-sm">
+            <a href="#" className="text-white/80 hover:text-white flex items-center gap-1 text-sm font-medium">
               <Briefcase className="w-4 h-4" />
               <span>Tìm việc</span>
             </a>
-            <a href="#" className="text-white/80 hover:text-white flex items-center gap-1 text-sm">
+            <a href="#" className="text-white/80 hover:text-white flex items-center gap-1 text-sm font-medium">
               <Building2 className="w-4 h-4" />
               <span>Nhà tuyển dụng</span>
             </a>
-            <a href="#" className="flex items-center justify-center rounded-lg h-10 px-4 bg-white/20 text-white text-sm font-bold hover:bg-white/30">Đăng ký</a>
+            <a href="#" className="flex items-center justify-center rounded-lg h-10 px-4 bg-white/20 text-white text-sm font-bold hover:bg-white/30 transition-colors">Đăng ký</a>
           </div>
         </div>
       </header>
 
       <motion.div
-        className="absolute w-96 h-96 bg-[#C7A59D]/30 rounded-full blur-3xl top-[-100px] left-[-100px]"
+        className="absolute w-96 h-96 bg-brand/10 rounded-full blur-3xl top-[-100px] left-[-100px]"
         animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute w-96 h-96 bg-[#27592D]/20 rounded-full blur-3xl bottom-[-120px] right-[-80px]"
+        className="absolute w-96 h-96 bg-brand/5 rounded-full blur-3xl bottom-[-120px] right-[-80px]"
         animate={{ scale: [1, 1.15, 1], opacity: [0.2, 0.4, 0.2] }}
         transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
       />
 
       <div className="flex-1 w-full flex items-center justify-center p-6">
         <motion.div
-          className="relative z-10 w-full max-w-md bg-white/70 backdrop-blur-lg shadow-2xl rounded-3xl p-8 border border-white/30"
+          className="relative z-10 w-full max-w-2xl bg-white shadow-2xl rounded-3xl p-12 sm:p-16 border border-gray-100"
           whileHover={{ scale: 1.01 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="flex items-center justify-center gap-3 mb-6 text-[#27592D]">
-            <MailCheck className="w-7 h-7" />
-            <h1 className="text-2xl sm:text-3xl font-semibold">Xác minh Email</h1>
+          {/* Icon + Title */}
+          <div className="flex flex-col items-center mb-12">
+            <div className="w-20 h-20 rounded-2xl bg-brand/10 flex items-center justify-center mb-6">
+              <MailCheck className="w-10 h-10 text-brand" />
+            </div>
+            <h1 className="text-4xl sm:text-5xl font-bold text-brand mb-3">Xác minh Email</h1>
+            <p className="text-center text-gray-500 text-base">Nhập mã 6 số đã gửi tới email của bạn.</p>
           </div>
-          <p className="text-center text-[#27592D] mb-6">Nhập mã 6 số đã gửi tới email của bạn.</p>
 
-          <div className="grid grid-cols-6 gap-3 sm:gap-4 mb-6" onPaste={handlePaste}>
+          <div className="grid grid-cols-6 gap-4 sm:gap-6 mb-10" onPaste={handlePaste}>
             {Array.from({ length }).map((_, i) => (
               <input
                 key={i}
@@ -213,7 +227,7 @@ const VerifyEmail = () => {
                 inputMode="numeric"
                 pattern="[0-9]*"
                 autoComplete="one-time-code"
-                className="w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl sm:text-3xl font-semibold border rounded-xl bg-white/60 focus:ring-2 focus:border-transparent outline-none transition border-[#C7A59D]/40 focus:ring-[#27592D] text-[#27592D]"
+                className="w-full aspect-square text-center text-3xl sm:text-4xl font-bold border-2 rounded-2xl bg-white focus:ring-2 focus:border-transparent outline-none transition border-gray-200 focus:ring-brand focus:bg-brand/5 text-gray-900 hover:border-brand/30"
                 value={values[i]}
                 onChange={(e) => handleChange(i, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(i, e)}
@@ -221,19 +235,21 @@ const VerifyEmail = () => {
             ))}
           </div>
 
-          <BrandButton type="button" disabled={submitting || code.length !== length} onClick={submit}>
-            Xác minh
-          </BrandButton>
+          <div className="flex justify-center">
+            <BrandButton type="button" disabled={submitting || code.length !== length} onClick={submit} className="px-12 py-4 text-lg">
+              Xác minh
+            </BrandButton>
+          </div>
 
           {error && (
-            <div className="text-center text-sm text-[#AA423A] mt-3">{error}</div>
+            <div className="text-center text-sm text-rust mt-3">{error}</div>
           )}
 
-          <div className="text-center text-sm text-[#27592D] mt-6">
+          <div className="text-center text-sm text-gray-600 mt-6">
             {cooldown > 0 ? (
               <span>Gửi lại mã sau {cooldown}s</span>
             ) : (
-              <button className="font-semibold text-[#27592D] hover:opacity-80" onClick={resend}>Gửi lại mã</button>
+              <button className="font-semibold text-brand hover:opacity-80" onClick={resend}>Gửi lại mã</button>
             )}
           </div>
         </motion.div>

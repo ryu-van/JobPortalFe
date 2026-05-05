@@ -40,6 +40,7 @@ const Register = () => {
       }
 
       const res = await authService.register(registerData);
+      localStorage.setItem('token', res.accessToken);
       dispatch(loginSuccess({ user: res.user, token: res.accessToken }));
 
       const route = authService.determinePostLoginRoute(res);
@@ -168,7 +169,11 @@ const Register = () => {
               <Controller
                 name="fullName"
                 control={control}
-                rules={{ required: "Vui lòng nhập họ tên" }}
+                rules={{
+                  required: "Vui lòng nhập họ tên",
+                  minLength: { value: 2, message: "Họ tên phải có ít nhất 2 ký tự" },
+                  maxLength: { value: 100, message: "Họ tên không được vượt quá 100 ký tự" },
+                }}
                 render={({ field, fieldState: { error } }) => (
                   <InputField
                     label="Họ và tên"
@@ -212,8 +217,14 @@ const Register = () => {
                 rules={{
                   required: "Vui lòng nhập mật khẩu",
                   minLength: {
-                    value: 6,
-                    message: "Mật khẩu phải có ít nhất 6 ký tự"
+                    value: 8,
+                    message: "Mật khẩu phải có ít nhất 8 ký tự"
+                  },
+                  validate: (value) => {
+                    if (!/[A-Z]/.test(value)) return "Mật khẩu phải có ít nhất 1 chữ hoa";
+                    if (!/[a-z]/.test(value)) return "Mật khẩu phải có ít nhất 1 chữ thường";
+                    if (!/[0-9]/.test(value)) return "Mật khẩu phải có ít nhất 1 chữ số";
+                    return true;
                   }
                 }}
                 render={({ field, fieldState: { error } }) => (

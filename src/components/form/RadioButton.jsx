@@ -10,7 +10,7 @@ export default function RadioButton({
   const base =
     "inline-flex items-center justify-center px-4 py-2 rounded-xl border text-sm font-medium transition select-none";
   const active =
-    "border-[#27592D] bg-[#27592D] text-white shadow-sm";
+    "border-[#000000] bg-[#000000] text-white shadow-sm";
   const inactive =
     "border-gray-300 bg-white text-gray-700 hover:bg-gray-50";
   const disabledCls =

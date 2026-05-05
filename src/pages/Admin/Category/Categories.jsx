@@ -199,7 +199,7 @@ export default function Categories() {
             )}
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
               row.level === 0 
-                ? "bg-gradient-to-br from-[#27592D] to-[#3a7a42]" 
+                ? "bg-gradient-to-br from-[#000000] to-[#3a7a42]" 
                 : "bg-gray-100"
             }`}>
               <FolderTree className={`w-5 h-5 ${row.level === 0 ? "text-white" : "text-gray-500"}`} />
@@ -355,7 +355,7 @@ export default function Categories() {
               onClick={() => setActiveTab("categories")}
               className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
                 activeTab === "categories"
-                  ? "bg-white text-[#27592D] shadow-sm"
+                  ? "bg-white text-[#000000] shadow-sm"
                   : "text-gray-600 hover:bg-white/70"
               }`}
             >
@@ -364,7 +364,7 @@ export default function Categories() {
               <span
                 className={`text-[11px] px-2 py-0.5 rounded-full ${
                   activeTab === "categories"
-                    ? "bg-[#27592D]/10 text-[#27592D]"
+                    ? "bg-[#000000]/10 text-[#000000]"
                     : "bg-gray-200 text-gray-600"
                 }`}
               >
@@ -376,7 +376,7 @@ export default function Categories() {
               onClick={() => setActiveTab("industries")}
               className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
                 activeTab === "industries"
-                  ? "bg-white text-[#27592D] shadow-sm"
+                  ? "bg-white text-[#000000] shadow-sm"
                   : "text-gray-600 hover:bg-white/70"
               }`}
             >
@@ -385,7 +385,7 @@ export default function Categories() {
               <span
                 className={`text-[11px] px-2 py-0.5 rounded-full ${
                   activeTab === "industries"
-                    ? "bg-[#27592D]/10 text-[#27592D]"
+                    ? "bg-[#000000]/10 text-[#000000]"
                     : "bg-gray-200 text-gray-600"
                 }`}
               >
@@ -398,7 +398,7 @@ export default function Categories() {
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#27592D] to-[#3a7a42] flex items-center justify-center">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#000000] to-[#3a7a42] flex items-center justify-center">
                   <FolderTree className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -449,7 +449,7 @@ export default function Categories() {
                     ? "Tìm kiếm danh mục..."
                     : "Tìm kiếm ngành nghề..."
                 }
-                className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#27592D] focus:border-transparent outline-none bg-gray-50 hover:bg-white transition-colors"
+                className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#000000] focus:border-transparent outline-none bg-gray-50 hover:bg-white transition-colors"
               />
               <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
             </div>
@@ -527,7 +527,7 @@ export default function Categories() {
           {(activeTab === "categories" ? loading : industryLoading) ? (
             <div className="flex items-center justify-center min-h-[400px]">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-[#27592D] mx-auto"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-[#000000] mx-auto"></div>
                 <p className="mt-4 text-gray-600 font-medium">
                   {activeTab === "categories"
                     ? "Đang tải danh sách danh mục..."
@@ -560,7 +560,7 @@ export default function Categories() {
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-2xl">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#27592D] to-[#3a7a42] flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#000000] to-[#3a7a42] flex items-center justify-center">
                     <FolderTree className="w-5 h-5 text-white" />
                   </div>
                   <h2 className="text-xl font-bold text-gray-900">
@@ -639,6 +639,7 @@ export default function Categories() {
                   onClick={async () => {
                     const errs = {};
                     if (!form.name?.trim()) errs.name = "Vui lòng nhập tên danh mục";
+                    else if (form.name.trim().length > 255) errs.name = "Tên danh mục không được vượt quá 255 ký tự";
                     if (Object.keys(errs).length) {
                       setFormErrors(errs);
                       return;
@@ -690,7 +691,7 @@ export default function Categories() {
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-2xl">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#27592D] to-[#3a7a42] flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#000000] to-[#3a7a42] flex items-center justify-center">
                     <BriefcaseBusiness className="w-5 h-5 text-white" />
                   </div>
                   <h2 className="text-xl font-bold text-gray-900">
@@ -768,7 +769,7 @@ export default function Categories() {
                       isActive: e.target.checked,
                     }))
                   }
-                  className="w-4 h-4 rounded border-gray-300 text-[#27592D] focus:ring-[#27592D]"
+                  className="w-4 h-4 rounded border-gray-300 text-[#000000] focus:ring-[#000000]"
                 />
                 <label
                   htmlFor="industry-active"
@@ -794,9 +795,15 @@ export default function Categories() {
                     const errs = {};
                     if (!industryForm.name?.trim()) {
                       errs.name = "Vui lòng nhập tên ngành nghề";
+                    } else if (industryForm.name.trim().length > 255) {
+                      errs.name = "Tên ngành nghề không được vượt quá 255 ký tự";
                     }
                     if (!industryForm.code?.trim()) {
                       errs.code = "Vui lòng nhập mã ngành";
+                    } else if (!/^[a-z0-9_-]+$/i.test(industryForm.code.trim())) {
+                      errs.code = "Mã ngành chỉ được chứa chữ cái, số, dấu gạch ngang và gạch dưới";
+                    } else if (industryForm.code.trim().length > 100) {
+                      errs.code = "Mã ngành không được vượt quá 100 ký tự";
                     }
                     if (Object.keys(errs).length) {
                       setIndustryFormErrors(errs);

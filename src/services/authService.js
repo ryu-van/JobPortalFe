@@ -1,13 +1,11 @@
 import authApi from "../api/authApi";
 import { ROLE_ID } from "../constants/roles";
-
 const authService = {
   async register(data) {
     try {
       const res = await authApi.register(data);
       const authResponse = res.data?.data;
       
-      // If authResponse doesn't have a user property, it might be the user object itself
       if (authResponse && !authResponse.user) {
         return { user: authResponse };
       }
@@ -72,6 +70,7 @@ const authService = {
     } finally {
       localStorage.removeItem("pending_verify_email");
       localStorage.removeItem("verify_skip_cooldown");
+      localStorage.removeItem("token");
     }
   },
 

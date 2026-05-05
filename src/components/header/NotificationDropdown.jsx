@@ -1,43 +1,30 @@
 import React, { useState, useRef, useEffect, useImperativeHandle, forwardRef } from "react";
-import { Bell, X, CheckCircle } from "lucide-react";
+import { Bell } from "lucide-react";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import NotificationItem from "./NotificationItem";
+import { readNotification, readAllNotifications } from "../../store/notificationActions";
+
+const NAVIGATION_MAP = {
+  APPLICATION: (id) => `/applications/${id}`,
+  JOB: (id) => `/jobs/${id}`,
+  COMPANY_VERIFICATION_REQUEST: (id) => `/admin/companies/requests/${id}`,
+};
 
 const NotificationDropdown = forwardRef(({ onCloseOther }, ref) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const items = useSelector((state) => state.notifications.items);
+  const unreadCount = useSelector((state) => state.notifications.unreadCount);
+
+  const badgeLabel = unreadCount > 99 ? "99+" : unreadCount;
 
   useImperativeHandle(ref, () => ({
-    close: () => setIsOpen(false)
+    close: () => setIsOpen(false),
   }));
-
-  // Mock notifications data
-  const notifications = [
-    {
-      id: 1,
-      title: "New job application",
-      message: "John Doe applied for Software Engineer position",
-      time: "5 minutes ago",
-      read: false,
-      type: "application"
-    },
-    {
-      id: 2,
-      title: "Interview scheduled",
-      message: "Interview with Jane Smith scheduled for tomorrow",
-      time: "1 hour ago",
-      read: false,
-      type: "interview"
-    },
-    {
-      id: 3,
-      title: "Profile update",
-      message: "Your profile has been updated successfully",
-      time: "2 hours ago",
-      read: true,
-      type: "system"
-    }
-  ];
-
-  const unreadCount = notifications.filter(n => !n.read).length;
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -49,97 +36,86 @@ const NotificationDropdown = forwardRef(({ onCloseOther }, ref) => {
 
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
-      onCloseOther?.();
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen, onCloseOther]);
+  }, [isOpen]);
 
   const handleToggle = () => {
-    setIsOpen(!isOpen);
-    if (!isOpen) {
+    const opening = !isOpen;
+    setIsOpen(opening);
+    if (opening) {
       onCloseOther?.();
     }
   };
 
+  const handleMarkAllRead = () => {
+    dispatch(readAllNotifications(undefined));
+  };
+
+  const handleNotificationClick = (notification) => {
+    if (!notification.isRead) {
+      dispatch(readNotification(notification.id, undefined));
+    }
+    const getPath = NAVIGATION_MAP[notification.referenceType];
+    if (getPath && notification.referenceId != null) {
+      navigate(getPath(notification.referenceId));
+    }
+    setIsOpen(false);
+  };
+
   return (
     <div className="relative" ref={dropdownRef}>
+      {/* Bell button */}
       <button
         type="button"
         onClick={handleToggle}
-        className="relative p-2 rounded-xl hover:bg-white/15 active:bg-white/20 transition-all duration-200 hover:scale-105 active:scale-95 shadow-sm group"
+        className="relative p-2 rounded-site hover:bg-white/10 active:bg-white/15 transition-all duration-200 group"
         aria-label="Notifications"
       >
-        <Bell className="w-5 h-5 drop-shadow-sm group-hover:animate-pulse" />
+        <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 w-4 h-4 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center shadow-lg border-2 border-white/30">
-            <span className="text-[10px] font-bold text-white">{unreadCount}</span>
+          <span className="absolute top-1 right-1 min-w-[16px] h-4 px-0.5 bg-brand rounded-full flex items-center justify-center border border-white">
+            <span className="text-[10px] font-bold text-white leading-none">{badgeLabel}</span>
           </span>
         )}
       </button>
 
-      {/* Notifications Dropdown */}
+      {/* Dropdown panel */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 animate-[fadeIn_0.2s_ease-out]">
-          <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-gray-900">Notifications</h3>
+        <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-soft border border-ivory-deep z-50 animate-[fadeIn_0.2s_ease-out]">
+          {/* Header */}
+          <div className="px-4 py-3 border-b border-ivory-deep flex items-center justify-between">
+            <h3 className="text-sm font-bold text-gray-900">Thông báo</h3>
             <button
-              onClick={() => setIsOpen(false)}
-              className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+              type="button"
+              onClick={handleMarkAllRead}
+              disabled={unreadCount === 0}
+              className="text-xs font-medium text-brand hover:text-brand-dark disabled:text-olive disabled:cursor-not-allowed transition-colors"
             >
-              <X className="w-4 h-4 text-gray-500" />
+              Đánh dấu tất cả đã đọc
             </button>
           </div>
+
+          {/* Notification list */}
           <div className="max-h-96 overflow-y-auto">
-            {notifications.length === 0 ? (
+            {items.length === 0 ? (
               <div className="p-8 text-center">
-                <Bell className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                <p className="text-sm text-gray-500">No notifications</p>
+                <Bell className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                <p className="text-sm text-gray-500">Bạn chưa có thông báo nào</p>
               </div>
             ) : (
-              notifications.map((notification) => (
-                <div
+              items.map((notification) => (
+                <NotificationItem
                   key={notification.id}
-                  className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer ${
-                    !notification.read ? "bg-blue-50/50" : ""
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className={`mt-1 p-1.5 rounded-lg ${
-                      notification.type === "application" ? "bg-blue-100 text-blue-600" :
-                      notification.type === "interview" ? "bg-green-100 text-green-600" :
-                      "bg-gray-100 text-gray-600"
-                    }`}>
-                      <CheckCircle className="w-4 h-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-semibold mb-1 ${
-                        !notification.read ? "text-gray-900" : "text-gray-700"
-                      }`}>
-                        {notification.title}
-                      </p>
-                      <p className="text-xs text-gray-600 mb-1 line-clamp-2">
-                        {notification.message}
-                      </p>
-                      <p className="text-xs text-gray-400">{notification.time}</p>
-                    </div>
-                    {!notification.read && (
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                    )}
-                  </div>
-                </div>
+                  notification={notification}
+                  onClick={() => handleNotificationClick(notification)}
+                />
               ))
             )}
           </div>
-          {notifications.length > 0 && (
-            <div className="p-3 border-t border-gray-200">
-              <button className="w-full text-xs font-medium text-[#27592D] hover:text-[#1f4a24] transition-colors">
-                View all notifications
-              </button>
-            </div>
-          )}
         </div>
       )}
     </div>
@@ -149,4 +125,3 @@ const NotificationDropdown = forwardRef(({ onCloseOther }, ref) => {
 NotificationDropdown.displayName = "NotificationDropdown";
 
 export default NotificationDropdown;
-

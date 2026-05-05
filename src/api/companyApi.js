@@ -74,12 +74,12 @@ const companyApi = {
   createCompanyVerificationRequest: (data, logo, documents) => {
     const formData = new FormData();
     formData.append(
-      "companyRequest",
+      "data",
       new Blob([JSON.stringify(data)], { type: "application/json" })
     );
 
     if (logo) {
-      formData.append("file", logo);
+      formData.append("logo", logo);
     }
 
     documents?.forEach((item) => {
@@ -94,12 +94,12 @@ const companyApi = {
   updateCompanyVerificationRequest: (requestId, data, logo, documents) => {
     const formData = new FormData();
     formData.append(
-      "companyRequest",
+      "data",
       new Blob([JSON.stringify(data)], { type: "application/json" })
     );
 
     if (logo) {
-      formData.append("file", logo);
+      formData.append("logo", logo);
     }
 
     documents?.forEach((item) => {

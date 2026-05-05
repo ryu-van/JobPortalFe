@@ -41,6 +41,7 @@ const Login = () => {
     dispatch(loginStart());
     try {
       const data = await authService.login(email, password);
+      localStorage.setItem('token', data.accessToken);
       dispatch(loginSuccess({ user: data.user, token: data.accessToken }));
       const next = authService.determinePostLoginRoute(data);
       navigate(next.path, { replace: true, state: next.state });
@@ -54,7 +55,7 @@ const Login = () => {
 
   return (
     <motion.div
-      className="min-h-screen w-full bg-[#f5f7fa] flex items-center justify-center"
+      className="min-h-screen w-full bg-white flex items-center justify-center"
       initial={{ opacity: 0, x: 32 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -32 }}
@@ -62,13 +63,13 @@ const Login = () => {
     >
       <div className="w-full h-screen grid grid-cols-1 lg:grid-cols-2 bg-white shadow-[0_25px_80px_-45px_rgba(0,0,0,0.45)] overflow-hidden">
         {/* LEFT */}
-        <div className="relative h-full bg-[#0f172a] hidden lg:block">
+        <div className="relative h-full bg-gray-900 hidden lg:block">
           <img
             src={Background}
             alt=""
             className="absolute inset-0 w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-[#0f172a]/70" />
+          <div className="absolute inset-0 bg-gray-900/70" />
 
           <div className="absolute top-6 left-6 text-white font-semibold text-lg flex items-center gap-2">
             <BriefcaseBusiness size={32} strokeWidth={2} />
@@ -92,7 +93,7 @@ const Login = () => {
 
         {/* RIGHT */}
         <div className="relative flex items-center justify-center p-6 lg:p-10 bg-white">
-          <div className="absolute top-4 right-4 text-[#27592D] font-bold text-sm sm:text-base flex items-center gap-2">
+          <div className="absolute top-4 right-4 text-brand font-bold text-sm sm:text-base flex items-center gap-2">
             <Handshake size={32} strokeWidth={2} />
             <span>RyuCareer</span>
           </div>
@@ -114,10 +115,10 @@ const Login = () => {
 
             <div className="flex items-center justify-between text-sm text-[#4b5563]">
               <label className="inline-flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="accent-[#27592D]" />
+                <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="accent-[#000000]" />
                 <span>Ghi nhớ đăng nhập</span>
               </label>
-              <button className="text-[#27592D] font-semibold hover:text-[#1f4022]">
+              <button className="text-[#000000] font-semibold hover:text-[#1f4022]">
                 Quên mật khẩu?
               </button>
             </div>
@@ -149,7 +150,7 @@ const Login = () => {
 
             <p className="text-sm text-center text-[#4b5563]">
               Bạn chưa có tài khoản?{" "}
-              <button className="text-[#27592D] font-semibold hover:text-[#1f4022]" onClick={() => navigate("/register")}>
+              <button className="text-[#000000] font-semibold hover:text-[#1f4022]" onClick={() => navigate("/register")}>
                 Đăng ký ngay
               </button>
             </p>

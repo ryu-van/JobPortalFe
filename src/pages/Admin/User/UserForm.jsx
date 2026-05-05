@@ -12,7 +12,6 @@ import companyService from "../../../services/companyService";
 import { useToast } from "../../../components/commons/ToastContext";
 import { roles, ROLE_NAME } from "../../../constants/roles";
 
-// --- Constants ---
 const GENDER_OPTIONS = [
   { label: "Nam", value: "MALE" },
   { label: "Nữ", value: "FEMALE" },
@@ -30,7 +29,6 @@ const ROLE_OPTIONS = [
   { value: roles.HR, label: ROLE_NAME.HR },
 ];
 
-// --- Sub-components ---
 const UserAvatarSection = ({ readOnly, avatarPreview, watchedAvatarUrl, avatarError, onAvatarClick, setAvatarError, fileInputRef, onAvatarFileChange }) => (
   <div className="flex-1 w-full lg:max-w-[320px] space-y-6">
     <div className="bg-[#F9F9F4] rounded-3xl p-8 flex flex-col items-center text-center border border-gray-100">
@@ -46,7 +44,7 @@ const UserAvatarSection = ({ readOnly, avatarPreview, watchedAvatarUrl, avatarEr
           </div>
         )}
         {!readOnly && (
-          <div className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-[#27592D] border-4 border-white text-white flex items-center justify-center shadow-md transition-transform group-hover:scale-110">
+          <div className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-[#000000] border-4 border-white text-white flex items-center justify-center shadow-md transition-transform group-hover:scale-110">
             <Pencil className="w-4 h-4" />
           </div>
         )}
@@ -55,7 +53,7 @@ const UserAvatarSection = ({ readOnly, avatarPreview, watchedAvatarUrl, avatarEr
       <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={onAvatarFileChange} />
     </div>
     <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-3">
-      <div className="flex items-center gap-2 text-[#27592D]"><Info className="w-4 h-4" /><span className="text-xs font-bold uppercase tracking-wider">Mẹo đăng ký</span></div>
+      <div className="flex items-center gap-2 text-[#000000]"><Info className="w-4 h-4" /><span className="text-xs font-bold uppercase tracking-wider">Mẹo đăng ký</span></div>
       <p className="text-sm text-gray-600 leading-relaxed">Đảm bảo tất cả thông tin liên lạc là chính xác để hệ thống xác minh.</p>
     </div>
   </div>
@@ -83,7 +81,7 @@ const CompanySection = ({
           <input
             type="text"
             placeholder="Tìm kiếm..."
-            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#27592D]/20 focus:border-[#27592D] outline-none"
+            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#000000]/20 focus:border-[#000000] outline-none"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -114,7 +112,7 @@ const CompanySection = ({
                     <div
                       className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                         watch("companyId") === c.id
-                          ? "border-[#27592D] bg-[#27592D]"
+                          ? "border-[#000000] bg-[#000000]"
                           : "border-gray-200"
                       }`}
                     >
@@ -152,19 +150,19 @@ const LinkedCompanyCard = ({ companyId, companyName, industry, navigate }) => {
       <h3 className="text-lg font-bold text-[#1F2D1F]">Công ty liên kết</h3>
       <div 
         onClick={() => navigate(`/admin/companies/${companyId}`)}
-        className="group cursor-pointer flex items-center gap-4 p-6 bg-gray-50 border border-gray-100 rounded-3xl hover:border-[#27592D] hover:bg-white transition-all shadow-sm hover:shadow-md"
+        className="group cursor-pointer flex items-center gap-4 p-6 bg-gray-50 border border-gray-100 rounded-3xl hover:border-[#000000] hover:bg-white transition-all shadow-sm hover:shadow-md"
       >
-        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center border border-gray-100 group-hover:border-[#27592D]/20 shadow-sm transition-colors">
-          <Building2 className="w-8 h-8 text-[#27592D]" />
+        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center border border-gray-100 group-hover:border-[#000000]/20 shadow-sm transition-colors">
+          <Building2 className="w-8 h-8 text-[#000000]" />
         </div>
         <div className="flex-1">
-          <h4 className="font-bold text-gray-900 text-lg group-hover:text-[#27592D] transition-colors">{companyName || "Chưa cập nhật tên công ty"}</h4>
+          <h4 className="font-bold text-gray-900 text-lg group-hover:text-[#000000] transition-colors">{companyName || "Chưa cập nhật tên công ty"}</h4>
           <p className="text-sm text-gray-500 flex items-center gap-2 mt-1">
             <span className="px-2 py-0.5 bg-gray-200 rounded-md text-[10px] font-bold uppercase tracking-wider">ID: {companyId}</span>
             {industry && <span>• {industry}</span>}
           </p>
         </div>
-        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-gray-100 group-hover:bg-[#27592D] group-hover:text-white transition-all shadow-sm">
+        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-gray-100 group-hover:bg-[#000000] group-hover:text-white transition-all shadow-sm">
           <Plus className="w-5 h-5 rotate-45" />
         </div>
       </div>
@@ -345,7 +343,7 @@ const UserForm = () => {
         {mode === "add" && (
           <div className="flex gap-4 border-b pb-6">
             {[{id: "HR", role: roles.HR, icon: BriefcaseBusiness, label: "Tạo HR"}, {id: "CANDIDATE", role: roles.CANDIDATE, icon: User, label: "Tạo Candidate"}].map(tab => (
-              <button key={tab.id} type="button" onClick={() => { setActiveTab(tab.id); setValue("roleId", tab.role); }} className={`flex items-center gap-3 px-6 py-3 rounded-2xl transition-all font-semibold ${activeTab === tab.id ? "bg-[#27592D] text-white shadow-md scale-105" : "bg-gray-50 text-gray-500 hover:bg-gray-100"}`}><tab.icon className="w-5 h-5" /><span>{tab.label}</span></button>
+              <button key={tab.id} type="button" onClick={() => { setActiveTab(tab.id); setValue("roleId", tab.role); }} className={`flex items-center gap-3 px-6 py-3 rounded-2xl transition-all font-semibold ${activeTab === tab.id ? "bg-[#000000] text-white shadow-md scale-105" : "bg-gray-50 text-gray-500 hover:bg-gray-100"}`}><tab.icon className="w-5 h-5" /><span>{tab.label}</span></button>
             ))}
           </div>
         )}
@@ -360,6 +358,7 @@ const UserForm = () => {
                   rules={{
                     required: "Vui lòng nhập họ và tên",
                     minLength: { value: 2, message: "Họ và tên tối thiểu 2 ký tự" },
+                    maxLength: { value: 100, message: "Họ và tên không được vượt quá 100 ký tự" },
                   }}
                   render={({field}) => <InputField {...field} label="Họ và tên *" disabled={readOnly} error={errors.fullName?.message} />}
                 />
@@ -378,7 +377,16 @@ const UserForm = () => {
               </div>
               {mode === "add" && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Controller name="password" control={control} rules={{required: true}} render={({field}) => <InputField {...field} type="password" label="Mật khẩu *" togglePassword={true} error={errors.password && "Bắt buộc"} />} />
+                  <Controller name="password" control={control} rules={{
+                    required: "Vui lòng nhập mật khẩu",
+                    minLength: { value: 8, message: "Mật khẩu phải có ít nhất 8 ký tự" },
+                    validate: (value) => {
+                      if (!/[A-Z]/.test(value)) return "Mật khẩu phải có ít nhất 1 chữ hoa";
+                      if (!/[a-z]/.test(value)) return "Mật khẩu phải có ít nhất 1 chữ thường";
+                      if (!/[0-9]/.test(value)) return "Mật khẩu phải có ít nhất 1 chữ số";
+                      return true;
+                    }
+                  }} render={({field}) => <InputField {...field} type="password" label="Mật khẩu *" togglePassword={true} error={errors.password?.message} />} />
                   <Controller 
                     name="dateOfBirth" 
                     control={control} 
@@ -405,8 +413,8 @@ const UserForm = () => {
                   rules={{
                     required: "Vui lòng nhập số điện thoại",
                     pattern: {
-                      value: /^\+?[0-9]{9,15}$/,
-                      message: "Số điện thoại không đúng định dạng",
+                      value: /^(0|\+84)[3-9][0-9]{8}$/,
+                      message: "Số điện thoại không đúng định dạng (ví dụ: 0912345678)",
                     },
                   }}
                   render={({field}) => <InputField {...field} label="Số điện thoại *" disabled={readOnly} error={errors.phoneNumber?.message} />}
@@ -433,7 +441,23 @@ const UserForm = () => {
                 render={({field}) => <InputField {...field} label="Địa chỉ chi tiết" disabled={readOnly} error={errors.street?.message} />}
               />
             </div>
-            <UserAvatarSection readOnly={readOnly} avatarPreview={avatarPreview} watchedAvatarUrl={watchedAvatarUrl} avatarError={avatarError} onAvatarClick={() => !readOnly && fileInputRef.current.click()} setAvatarError={setAvatarError} fileInputRef={fileInputRef} onAvatarFileChange={e => { const f = e.target.files?.[0]; if(f) { setAvatarFile(f); setAvatarPreview(URL.createObjectURL(f)); } }} />
+            <UserAvatarSection readOnly={readOnly} avatarPreview={avatarPreview} watchedAvatarUrl={watchedAvatarUrl} avatarError={avatarError} onAvatarClick={() => !readOnly && fileInputRef.current.click()} setAvatarError={setAvatarError} fileInputRef={fileInputRef} onAvatarFileChange={e => {
+              const f = e.target.files?.[0];
+              if (!f) return;
+              if (!f.type.startsWith("image/")) {
+                setAvatarError("Vui lòng chọn file ảnh hợp lệ (JPG, PNG, GIF...)");
+                e.target.value = "";
+                return;
+              }
+              if (f.size > 5 * 1024 * 1024) {
+                setAvatarError("Ảnh đại diện không được vượt quá 5MB");
+                e.target.value = "";
+                return;
+              }
+              setAvatarError(false);
+              setAvatarFile(f);
+              setAvatarPreview(URL.createObjectURL(f));
+            }} />
           </div>
 
           {mode !== "add" && linkedCompanyInfo?.id && (

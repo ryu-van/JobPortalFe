@@ -207,11 +207,11 @@ export default function Job() {
         </div>
         <BrandButton
           fullWidth={false}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white bg-[#27592D] hover:bg-[#1f4022] transition shadow"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white bg-[#000000] hover:bg-[#1f4022] transition shadow"
           onClick={() => navigate(`${basePath}/new`)}
         >
           <Plus className="w-4 h-4" />
-          Create New Job
+          Tạo công việc
         </BrandButton>
       </div>
 
@@ -264,7 +264,7 @@ export default function Job() {
               key={t.key}
               className={`px-4 py-2 rounded-xl text-sm transition ${
                 active
-                  ? "bg-[#27592D]/10 text-[#27592D] font-semibold"
+                  ? "bg-[#000000]/10 text-[#000000] font-semibold"
                   : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
               }`}
               onClick={() => {
@@ -287,7 +287,7 @@ export default function Job() {
         {loading ? (
           <div className="flex items-center justify-center min-h-[240px]">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#27592D] mx-auto"></div>
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#000000] mx-auto"></div>
               <p className="mt-3 text-gray-600">Đang tải danh sách công việc...</p>
             </div>
           </div>

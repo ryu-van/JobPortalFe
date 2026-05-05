@@ -10,23 +10,23 @@ export default function Table({
 }) {
   return (
     <div className={`w-full overflow-x-auto ${className}`}>
-      <table className={`min-w-full bg-white ${bordered ? "border border-gray-200 rounded-xl" : ""}`}>
-        <thead className="bg-gray-50">
+      <table className={`min-w-full bg-white ${bordered ? "border border-ivory-deep rounded-2xl" : ""}`}>
+        <thead className="bg-ivory-alt border-b border-ivory-deep">
           <tr>
             {columns.map((col, idx) => (
               <th
                 key={col.accessor || col.header || idx}
-                className={`text-left px-4 ${compact ? "py-2" : "py-3"} text-sm font-semibold text-gray-700`}
+                className={`text-left px-6 ${compact ? "py-3" : "py-4"} text-[10px] font-bold uppercase tracking-widest text-brand/60`}
               >
                 {col.header || col.label || ""}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-100">
+        <tbody className="divide-y divide-ivory-deep">
           {data.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="px-4 py-6 text-center text-gray-500">
+              <td colSpan={columns.length} className="px-6 py-12 text-center text-brand/40 font-bold uppercase tracking-widest text-xs">
                 {emptyMessage}
               </td>
             </tr>
@@ -34,7 +34,7 @@ export default function Table({
             data.map((row, ri) => (
               <tr
                 key={ri}
-                className={`${striped && ri % 2 === 1 ? "bg-gray-50/50" : "bg-white"} hover:bg-gray-50 ${onRowClick ? "cursor-pointer" : ""}`}
+                className={`${striped && ri % 2 === 1 ? "bg-ivory-soft/30" : "bg-white"} hover:bg-ivory-alt/50 transition-colors ${onRowClick ? "cursor-pointer" : ""}`}
                 onClick={(e) => {
                   if (!onRowClick) return;
                   if (
@@ -57,7 +57,7 @@ export default function Table({
                   return (
                     <td
                       key={`${ri}-${ci}`}
-                      className={`px-4 ${compact ? "py-2" : "py-3"} text-sm text-gray-700`}
+                      className={`px-6 ${compact ? "py-3" : "py-5"} text-sm font-medium text-brand`}
                     >
                       {content}
                     </td>

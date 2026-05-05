@@ -34,7 +34,7 @@ export default function Pagination({
   const baseBtn =
     "inline-flex items-center justify-center min-w-9 h-9 px-3 rounded-lg text-sm transition border";
   const active =
-    "bg-[#27592D] text-white border-[#27592D] hover:bg-[#1f4022]";
+    "bg-[#000000] text-white border-[#000000] hover:bg-[#1f4022]";
   const inactive =
     "bg-white text-gray-700 border-gray-200 hover:bg-gray-50";
   const disabled =

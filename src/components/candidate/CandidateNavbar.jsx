@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Menu, X } from "lucide-react";
 import CandidateUserMenu from "./CandidateUserMenu";
+import NotificationDropdown from "../header/NotificationDropdown";
 
 const NAV_LINKS = [
   { to: "/jobs", label: "Tìm việc" },
@@ -15,24 +16,24 @@ export default function CandidateNavbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="relative bg-white/95 backdrop-blur border border-gray-100 rounded-2xl px-5 py-3.5 flex items-center justify-between gap-4 shadow-sm">
-      {/* Logo — text only, no icon box */}
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm -mx-4 md:-mx-6 lg:-mx-10 xl:-mx-16 px-4 md:px-6 lg:px-10 xl:px-16 py-3 md:py-4 flex items-center justify-between gap-3 md:gap-4">
       <Link to="/" className="flex items-center flex-shrink-0">
-        <span className="font-extrabold text-lg text-[#27592D] tracking-tight">RyuCareer</span>
+        <span className="font-bold text-xl md:text-2xl tracking-tight">
+          <span className="text-brand">Ryu</span><span className="text-rust">Career</span>
+        </span>
       </Link>
 
-      {/* Desktop nav */}
-      <nav className="hidden md:flex items-center gap-1">
+      <nav className="hidden lg:flex items-center gap-6 xl:gap-8" aria-label="Main navigation">
         {NAV_LINKS.map(({ to, label }) => {
           const active = location.pathname === to;
           return (
             <Link
               key={to}
               to={to}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+              className={`text-sm font-semibold transition-all border-b-2 pb-1 ${
                 active
-                  ? "bg-[#27592D]/10 text-[#27592D]"
-                  : "text-gray-600 hover:text-[#27592D] hover:bg-gray-50"
+                  ? "text-gray-900 border-gray-900"
+                  : "text-gray-500 border-transparent hover:text-gray-900"
               }`}
             >
               {label}
@@ -41,59 +42,71 @@ export default function CandidateNavbar() {
         })}
       </nav>
 
-      {/* Right side */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 md:gap-4">
         {userInfo ? (
-          <CandidateUserMenu />
+          <>
+            <NotificationDropdown />
+            <CandidateUserMenu />
+          </>
         ) : (
           <>
             <Link
               to="/login"
-              className="hidden sm:block px-4 py-2 text-sm font-medium text-gray-700 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
+              className="hidden sm:block text-sm font-semibold text-gray-900 hover:text-brand transition-colors"
             >
               Đăng nhập
             </Link>
             <Link
               to="/register"
-              className="px-4 py-2 text-sm font-semibold text-white bg-[#27592D] rounded-xl hover:bg-[#1f4022] transition-colors shadow-sm"
+              className="text-sm font-semibold text-gray-900 hover:text-brand transition-colors"
             >
               Đăng ký
             </Link>
           </>
         )}
 
-        {/* Mobile menu toggle */}
         <button
-          className="md:hidden p-2 rounded-xl hover:bg-gray-100 transition-colors"
+          className="lg:hidden p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
           onClick={() => setMobileOpen((v) => !v)}
+          aria-label={mobileOpen ? "Đóng menu" : "Mở menu"}
+          aria-expanded={mobileOpen}
         >
-          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          {mobileOpen ? <X className="w-5 h-5 text-gray-700" /> : <Menu className="w-5 h-5 text-gray-700" />}
         </button>
       </div>
 
-      {/* Mobile nav */}
       {mobileOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-100 rounded-2xl shadow-xl p-3 z-50 md:hidden">
-          {NAV_LINKS.map(({ to, label }) => (
-            <Link
-              key={to}
-              to={to}
-              onClick={() => setMobileOpen(false)}
-              className="block px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#27592D] transition-colors"
-            >
-              {label}
-            </Link>
-          ))}
-          {!userInfo && (
-            <Link
-              to="/login"
-              onClick={() => setMobileOpen(false)}
-              className="block px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#27592D] transition-colors"
-            >
-              Đăng nhập
-            </Link>
-          )}
-        </div>
+        <>
+          <div
+            className="fixed inset-0 bg-black/20 z-40 lg:hidden"
+            onClick={() => setMobileOpen(false)}
+          />
+          <nav
+            data-testid="mobile-menu"
+            aria-label="Mobile navigation"
+            className="absolute top-full left-0 right-0 bg-white border-b border-gray-100 shadow-lg p-3 z-50 lg:hidden"
+          >
+            {NAV_LINKS.map(({ to, label }) => (
+              <Link
+                key={to}
+                to={to}
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center px-4 py-3 min-h-[44px] rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-brand transition-colors"
+              >
+                {label}
+              </Link>
+            ))}
+            {!userInfo && (
+              <Link
+                to="/login"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center px-4 py-3 min-h-[44px] rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+              >
+                Đăng nhập
+              </Link>
+            )}
+          </nav>
+        </>
       )}
     </header>
   );

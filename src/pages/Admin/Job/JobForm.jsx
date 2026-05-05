@@ -664,7 +664,7 @@ export default function JobForm() {
                     <label
                       key={c.value}
                       className={`flex items-center gap-2 px-2 py-1 rounded-lg text-sm ${
-                        selected ? "bg-[#27592D]/10 text-[#27592D]" : "text-gray-700"
+                        selected ? "bg-[#000000]/10 text-[#000000]" : "text-gray-700"
                       } ${isView ? "opacity-70" : "cursor-pointer hover:bg-gray-50"}`}
                     >
                       <input
@@ -708,9 +708,10 @@ export default function JobForm() {
                     type="button"
                     onClick={() => {
                       setSkillModalError("");
+                      setNewSkillName("");
                       setSkillModalOpen(true);
                     }}
-                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#27592D]/10 text-[#27592D] hover:bg-[#27592D]/20"
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#15803d]/10 text-[#15803d] hover:bg-[#15803d]/20"
                   >
                     + Tạo skill mới
                   </button>
@@ -723,7 +724,7 @@ export default function JobForm() {
                     <label
                       key={s.value}
                       className={`flex items-center gap-2 px-2 py-1 rounded-lg text-sm ${
-                        selected ? "bg-[#27592D]/10 text-[#27592D]" : "text-gray-700"
+                        selected ? "bg-[#15803d]/10 text-[#15803d]" : "text-gray-700"
                       } ${isView ? "opacity-70" : "cursor-pointer hover:bg-gray-50"}`}
                     >
                       <input
